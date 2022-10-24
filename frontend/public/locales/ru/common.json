@@ -1,0 +1,104 @@
+{
+  "pages": {
+    "login": {
+      "signin": "Войти",
+      "signup": "Зарегистрироваться",
+      "username": "Пользователь",
+      "password": "Пароль",
+      "remember": "Запоминть",
+      "forgotPassword": "Забыли пароль?",
+      "title": "Вход в систему",
+      "noAccount": "Нет аккаунта?"
+    },
+    "error": {
+      "info": "Возможно Вы забыли добавить компонент {{action}} для ресурса {{resource}}.",
+      "404": "Извините, такой страницы не существует.",
+      "resource404": "Вы уверены, что хотите создать данный ресурс - {{resource}}?",
+      "backHome": "Домой"
+    }
+  },
+  "buttons": {
+    "create": "Создать",
+    "save": "Сохранить",
+    "logout": "Выйти",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "cancel": "Отменить",
+    "confirm": "Вы уверены?",
+    "filter": "Фильтр",
+    "clear": "Очистить",
+    "refresh": "Обновить",
+    "show": "Показать",
+    "undo": "Отменить",
+    "import": "Импорт",
+    "clone": "Клонировать",
+    "notAccessTitle": "У Вас нет прав доступа"
+  },
+  "warnWhenUnsavedChanges": "Вы уверены, что хотите выйти? У Вас есть несохраненные изменения.",
+  "notifications": {
+    "success": "Успешно",
+    "error": "Ошибка (статус: {{statusCode}})",
+    "undoable": "У Вас есть {{seconds}} секунд для отмены изменений",
+    "createSuccess": "Успешно создан {{resource}}",
+    "createError": "Ошибка создания {{resource}} (статус: {{statusCode}})",
+    "deleteSuccess": "Успешно удален {{resource}}",
+    "deleteError": "Ошибка удаления {{resource}} (статус: {{statusCode}})",
+    "editSuccess": "Успешно отредактирован {{resource}}",
+    "editError": "Ошибка редактирования {{resource}} (статус: {{statusCode}})",
+    "importProgress": "Импорт: {{processed}}/{{total}}"
+  },
+  "loading": "Загрузка",
+  "users": {
+    "users": "Пользователи",
+    "fields": {
+      "id": "Id",
+      "email": "E-mail адрес",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "name": "Пользователь",
+      "password": "Пароль",
+      "passwordConfirmation": "Подтверждение пароля",
+      "createdAt": "Создан",
+      "updatedAt": "Обновлен",
+      "role": "Роль",
+      "isActive": "Активен",
+      "factory": "Компания",
+      "description": "Описание",
+      "roles": {
+        "admin": "Администратор",
+        "user": "Пользователь"
+      }
+    },
+    "titles": {
+      "create": "Создать пользователя",
+      "edit": "Редактировать пользователя",
+      "list": "Пользователи",
+      "show": "Профиль пользователя"
+    }
+  },
+  "files": {
+    "fields": {
+      "id": "Id",
+      "name": "Имя",
+      "createdAt": "Создан",
+      "isUploaded": "Загружен",
+      "deleted": "Удален"
+    }
+  },
+  "table": {
+    "actions": "Действия"
+  },
+  "enum": {
+    "orderStatuses": {
+      "CREATED": "СОЗДАН",
+      "UPLOADING": "ЗАГРУЖАЕТСЯ",
+      "UPLOADING_ERROR": "ОШИБКА ЗАГРУЗКИ",
+      "READY_FOR_PROCESSING": "ГОТОВ К ОБРАБОТКЕ",
+      "PROCESSING": "ОБРАБОТКА",
+      "PROCESSING_ERROR": "ОШИБКА ОБРАБОТКИ",
+      "PARTIALLY_PROCESSED": "ЧАСТИЧНО ОБРАБОТАН",
+      "DONE": "ОБРАБОТАН",
+      "ERROR": "ОШИБКА"
+    }
+  }
+}
