@@ -37,13 +37,6 @@ export const UsersList: React.FC<IResourceComponentsProps> = () => {
   return (
     <List canCreate={permissionsData?.includes(Roles.ADMIN)} >
       <Table {...tableProps} rowKey="id">
-        {/* <Table.Column dataIndex="id" title="ID" /> */}
-        {/* <Table.Column
-          dataIndex="id"
-          key="id"
-          title="ID"
-          render={(value) => <TextField value={value} />}
-        /> */}
         <Table.Column
           dataIndex="email"
           key="email"

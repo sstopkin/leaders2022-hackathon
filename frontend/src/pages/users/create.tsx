@@ -5,7 +5,6 @@ import {
   Input,
   Select,
   useForm,
-  // useSelect
 } from "@pankod/refine-antd";
 
 import "react-mde/lib/styles/css/react-mde-all.css";
@@ -22,26 +21,9 @@ export const UsersCreate: React.FC<IResourceComponentsProps> = () => {
 
   const { formProps, saveButtonProps } = useForm<IUser>();
 
-  // const { selectProps: factoriesSelectProps } = useSelect<IFactory>({
-  //   resource: "factories",
-  //   optionLabel: "name",
-  //   optionValue: "id",
-  // });
-
   return (
     <Create saveButtonProps={saveButtonProps}>
       <Form {...formProps} layout="vertical">
-        {/* <Form.Item
-          label={t("users.fields.factory")}
-          name="factories"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select mode="multiple" {...factoriesSelectProps} />
-        </Form.Item> */}
         <Form.Item
           label={t("users.fields.email")}
           name="email"

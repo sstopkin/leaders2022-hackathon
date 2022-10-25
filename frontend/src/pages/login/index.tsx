@@ -9,11 +9,10 @@ import {
     Form,
     Input,
     Button,
-    Checkbox,
 } from "@pankod/refine-antd";
 import "./styles.css";
 
-const { Text, Title } = Typography;
+const { Title } = Typography;
 
 export interface ILoginForm {
     username: string;
@@ -43,9 +42,6 @@ export const Login: React.FC = () => {
             >
                 <Col xs={22}>
                     <div className="container">
-                        <div className="imageContainer">
-                            <img src={"/logo-full-big.svg"} alt="Logo" />
-                        </div>
                         <Card title={CardTitle} headStyle={{ borderBottom: 0 }}>
                             <Form<ILoginForm>
                                 layout="vertical"

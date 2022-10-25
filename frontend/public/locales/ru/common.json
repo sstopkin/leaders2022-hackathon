@@ -76,29 +76,30 @@
       "show": "Профиль пользователя"
     }
   },
-  "files": {
+  "researches": {
+    "researches": "Исследования",
     "fields": {
       "id": "Id",
       "name": "Имя",
+      "fileId": "ID файла",
+      "status": "Статус",
       "createdAt": "Создан",
-      "isUploaded": "Загружен",
-      "deleted": "Удален"
+      "updatedAt": "Обновлен",
+      "size": "Размер"
+    },
+    "titles": {
+      "list": "Исследования"
     }
   },
   "table": {
     "actions": "Действия"
   },
   "enum": {
-    "orderStatuses": {
+    "researchStatuses": {
       "CREATED": "СОЗДАН",
-      "UPLOADING": "ЗАГРУЖАЕТСЯ",
-      "UPLOADING_ERROR": "ОШИБКА ЗАГРУЗКИ",
-      "READY_FOR_PROCESSING": "ГОТОВ К ОБРАБОТКЕ",
-      "PROCESSING": "ОБРАБОТКА",
-      "PROCESSING_ERROR": "ОШИБКА ОБРАБОТКИ",
-      "PARTIALLY_PROCESSED": "ЧАСТИЧНО ОБРАБОТАН",
-      "DONE": "ОБРАБОТАН",
-      "ERROR": "ОШИБКА"
+      "IN_WORK": "В РАБОТЕ",
+      "REVIEW": "НА РЕВЬЮ",
+      "DONE": "ОБРАБОТАН"
     }
   }
 }

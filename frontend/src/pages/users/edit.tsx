@@ -7,7 +7,6 @@ import {
   Input,
   Select,
   useForm,
-  // useSelect,
 } from "@pankod/refine-antd";
 
 import "react-mde/lib/styles/css/react-mde-all.css";
@@ -23,12 +22,6 @@ export const UsersEdit: React.FC<IResourceComponentsProps> = () => {
 
   const { formProps, saveButtonProps } = useForm<IUser>();
   const { data } = usePermissions<string>();
-
-  // const { selectProps: factoriesSelectProps } = useSelect<IFactory>({
-  //   resource: "factories",
-  //   optionLabel: "name",
-  //   optionValue: "id",
-  // });
 
   return (
     <Edit saveButtonProps={saveButtonProps}
@@ -113,18 +106,6 @@ export const UsersEdit: React.FC<IResourceComponentsProps> = () => {
         >
           <Input.Password />
         </Form.Item>
-        {/* <Form.Item
-          label={t("users.fields.factory")}
-          name="factories"
-
-          rules={[
-              {
-                required: true,
-              },
-          ]}
-        >
-          <Select mode="multiple" {...factoriesSelectProps} />
-        </Form.Item> */}
         <Form.Item
           label={t("users.fields.role")}
           name="role"
