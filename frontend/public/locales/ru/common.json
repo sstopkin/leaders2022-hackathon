@@ -96,7 +96,7 @@
   },
   "enum": {
     "researchStatuses": {
-      "CREATED": "СОЗДАН",
+      "CREATED": "НЕ РАЗМЕЧЕН",
       "IN_WORK": "В РАБОТЕ",
       "REVIEW": "НА РЕВЬЮ",
       "DONE": "ОБРАБОТАН"

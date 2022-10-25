@@ -11,6 +11,7 @@ import routerProvider from "@pankod/refine-react-router-v6";
 import dataProvider from "@pankod/refine-simple-rest";
 import {authProvider} from "./authProvider";
 import {UsersList, UsersCreate, UsersEdit, UsersShow} from "pages/users";
+import {ResearchesCreate, ResearchesList, ResearchesShow} from "./pages/researches/";
 import {
     Title,
     Header,
@@ -23,7 +24,6 @@ import {useTranslation} from "react-i18next";
 import {Login} from "pages/login";
 import axios, {AxiosRequestConfig} from "axios";
 import * as constants from "./constants";
-import {ResearchesList, ResearchesShow} from "./pages/researches/";
 
 const axiosInstance: any = axios.create();
 
@@ -112,7 +112,8 @@ function App() {
                     name: 'researches',
                     icon: <Icons.SnippetsOutlined/>,
                     list: ResearchesList,
-                    show: ResearchesShow
+                    show: ResearchesShow,
+                    create: ResearchesCreate
                 },
             ]}
             Title={Title}

@@ -14,7 +14,7 @@ import {
     DeleteButton,
     ShowButton,
     TagField,
-    Button,
+    Button, Icons,
 } from "@pankod/refine-antd";
 import {IResearch} from "interfaces";
 import {Roles} from "interfaces/roles";
@@ -48,7 +48,8 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
     const {data: permissionsData} = usePermissions();
 
     return (
-        <List canCreate>
+        <List headerButtons={() => <Button type="primary" onClick={() => navigate.push('/researches/create')}
+                                           icon={<Icons.UploadOutlined/>}>Загрузить исследование</Button>}>
             <Table {...tableProps} rowKey="id">
                 <Table.Column
                     dataIndex="id"
@@ -97,7 +98,8 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                     dataIndex="actions"
                     render={(_, record) => (
                         <Space>
-                            <ShowButton  hideText size="small" recordItemId={record.id}/>
+                            <Button onClick={() => navigate.push(`/researches/show/${record.id}`)} type="primary"
+                                    size="small">Разметить</Button>
                             {permissionsData?.includes(Roles.ADMIN) && (
                                 <DeleteButton hideText size="small" recordItemId={record.id}/>
                             )}
