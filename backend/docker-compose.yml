@@ -1,0 +1,67 @@
+version: '3.7'
+
+networks:
+  network:
+    name: "${APP_NAME}-network"
+
+services:
+  backend:
+    image: ${APP_NAME}-backend:latest-local
+    hostname: ${APP_NAME}-backend-local
+    container_name: ${APP_NAME}-backend-local
+    env_file:
+      - ops-tools/environments/local/.env
+    networks:
+      - network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - minio
+
+  db:
+    restart: always
+    image: postgres:14-alpine
+    hostname: ${APP_NAME}-db
+    container_name: ${APP_NAME}-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/
+    ports:
+      - "5432:5432"
+    networks:
+      - network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+
+  minio:
+    restart: always
+    image: minio/minio
+    hostname: ${APP_NAME}-minio
+    container_name: ${APP_NAME}-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+    entrypoint: minio server /data --console-address ":9001"
+
+volumes:
+  postgres_data:
+    name: ${APP_NAME}-db
+  minio_data:
+    name: ${APP_NAME}-minio

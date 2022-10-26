@@ -3,13 +3,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json } from 'express';
-import { SqsModule, SqsQueueType } from '@nestjs-packages/sqs';
 import helmet from 'helmet';
+import { AppConfigService } from './core/config';
+import * as process from 'process';
 
-const API_DEFAULT_PORT = 3000;
-const API_DEFAULT_PREFIX = '/api/v1/';
-
-const SWAGGER_TITLE = 'Sinovoltaics admin panel';
+const SWAGGER_TITLE = 'Hackathon-Leaders 2022';
 const SWAGGER_DESCRIPTION = 'API';
 const SWAGGER_PREFIX = '/docs';
 
@@ -28,27 +26,33 @@ function createSwagger(app: INestApplication) {
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup(SWAGGER_PREFIX, app, document);
+  SwaggerModule.setup(
+    `${process.env.API_PREFIX}${SWAGGER_PREFIX}`,
+    app,
+    document,
+    {
+      swaggerOptions: {
+        tagsSorter: 'alpha',
+        operationsSorter: 'alpha',
+      },
+    },
+  );
 }
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    cors: process.env.ENV === 'local' ? true : false,
+    cors: process.env.ENV === 'local',
     logger:
       process.env.ENV === 'staging' || process.env.ENV === 'production'
         ? PROD_LOG_LEVELS
         : DEV_LOG_LEVELS,
   });
-
-  app.setGlobalPrefix(process.env.API_PREFIX || API_DEFAULT_PREFIX);
+  const config = app.get(AppConfigService);
+  app.setGlobalPrefix(config.API_PREFIX);
 
   if (!process.env.SWAGGER_ENABLE || process.env.SWAGGER_ENABLE === '1') {
     createSwagger(app);
   }
-  SqsModule.registerQueue({
-    name: process.env.AWS_SQS_QUEUE_NAME,
-    type: SqsQueueType.Producer,
-  });
 
   app.use(json());
   app.use(
@@ -64,8 +68,9 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.API_PORT || API_DEFAULT_PORT);
+  await app.listen(config.API_PORT);
 }
+
 bootstrap().catch((err) => {
   console.error(err);
   process.exit(1);
