@@ -4,6 +4,8 @@ import { AppConfigService, validationSchema } from './core/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user';
+import { ResearchModule } from './modules/research/research.module';
+import { DicomModule } from './modules/dicom/dicom.module';
 import * as _ from 'lodash';
 import * as process from 'process';
 
@@ -25,6 +27,8 @@ import * as process from 'process';
     }),
     AuthModule,
     UserModule,
+    ResearchModule,
+    DicomModule,
   ],
   controllers: [],
   providers: [AppConfigService],
