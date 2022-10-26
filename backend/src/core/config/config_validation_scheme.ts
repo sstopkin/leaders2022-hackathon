@@ -7,6 +7,7 @@ export const validationSchema = Joi.object({
   API_PORT: Joi.number().required(),
   API_PREFIX: Joi.string(),
   API_EXTERNAL_URI: Joi.string().required(),
+  API_KEY: Joi.string().required(),
 
   JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
   JWT_ACCESS_TOKEN_EXPIRATION: Joi.string().required(),
@@ -23,4 +24,11 @@ export const validationSchema = Joi.object({
   TYPEORM_SYNCHRONIZE: Joi.boolean().required(),
   TYPEORM_MIGRATIONS_DIR: Joi.string().required(),
   TYPEORM_MIGRATIONS: Joi.string().required(),
+
+  S3_URL: Joi.string().required(),
+  S3_REGION: Joi.string().required(),
+  S3_ACCESS_KEY: Joi.string().required(),
+  S3_SECRET_KEY: Joi.string().required(),
+  S3_BUCKET: Joi.string().required(),
+  S3_PRESIGNED_URL_ACCESS_INTERVAL: Joi.number().required(),
 });

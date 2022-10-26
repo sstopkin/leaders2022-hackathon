@@ -45,8 +45,8 @@ services:
     hostname: ${APP_NAME}-minio
     container_name: ${APP_NAME}-minio
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ACCESS_KEY: ${S3_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${S3_SECRET_KEY}
     volumes:
       - minio_data:/data
     ports:
@@ -59,6 +59,19 @@ services:
       options:
         max-size: "500m"
     entrypoint: minio server /data --console-address ":9001"
+
+#  createbuckets:
+#    image: minio/mc
+#    networks:
+#      - network
+#    depends_on:
+#      - minio
+#    entrypoint: >
+#      /bin/sh -c "
+#      /usr/bin/mc alias set ${APP_NAME}-minio http://${APP_NAME}-minio:9000 ${S3_ROOT_USER} ${S3_ROOT_PASSWORD};
+#      /usr/bin/mc mb ${APP_NAME}-minio/somebucketname;
+#      exit 0;
+#      "
 
 volumes:
   postgres_data:

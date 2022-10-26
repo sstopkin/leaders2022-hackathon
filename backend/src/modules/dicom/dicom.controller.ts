@@ -10,10 +10,11 @@ import {
 import { DicomService } from './dicom.service';
 import { CreateDicomDto } from './dto/create-dicom.dto';
 import { UpdateDicomDto } from './dto/update-dicom.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('dicom')
 @ApiTags('Dicom')
+@ApiBearerAuth()
 export class DicomController {
   constructor(private readonly dicomService: DicomService) {}
 

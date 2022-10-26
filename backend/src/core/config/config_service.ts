@@ -27,6 +27,10 @@ export class AppConfigService {
     return this.configService.get('API_EXTERNAL_URI');
   }
 
+  get API_KEY(): string {
+    return this.configService.get('API_KEY');
+  }
+
   get JWT_ACCESS_TOKEN_SECRET(): string {
     return this.configService.get('JWT_ACCESS_TOKEN_SECRET');
   }
@@ -77,5 +81,29 @@ export class AppConfigService {
 
   get TYPEORM_MIGRATIONS(): string {
     return this.configService.get('TYPEORM_MIGRATIONS');
+  }
+
+  get S3_URL(): string {
+    return this.configService.get('S3_URL');
+  }
+
+  get S3_REGION(): string {
+    return this.configService.get('S3_REGION');
+  }
+
+  get S3_ACCESS_KEY(): string {
+    return this.configService.get('S3_ACCESS_KEY');
+  }
+
+  get S3_SECRET_KEY(): string {
+    return this.configService.get('S3_SECRET_KEY');
+  }
+
+  get S3_BUCKET(): string {
+    return this.configService.get('S3_BUCKET');
+  }
+
+  get S3_PRESIGNED_URL_ACCESS_INTERVAL(): number {
+    return this.configService.get<number>('S3_PRESIGNED_URL_ACCESS_INTERVAL');
   }
 }

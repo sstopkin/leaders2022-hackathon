@@ -1,10 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
+  CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ResearchStatus } from './research.status';
 import { Dicom } from '../../dicom/entities/dicom.entity';
@@ -30,16 +32,10 @@ export class Research {
   public description: string;
 
   @ApiProperty({
-    description: 'Original DICOM file',
+    description: 'DICOM files',
   })
-  @OneToOne(() => Dicom, (dicom) => dicom.research)
-  public originalDicom: Dicom;
-
-  @ApiProperty({
-    description: 'Generated DICOM file',
-  })
-  @OneToOne(() => Dicom, (dicom) => dicom.research)
-  public generatedDicom: Dicom;
+  @OneToMany(() => Dicom, (dicom) => dicom.research)
+  public dicoms: Dicom[];
 
   @ApiProperty({ description: 'Research status', example: 'created' })
   @Column({
@@ -50,21 +46,22 @@ export class Research {
   })
   public status: ResearchStatus;
 
-  @ApiProperty({ description: 'User creation timestamp' })
-  @Column({
+  @ApiProperty({ description: 'Research creation timestamp' })
+  @CreateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP()',
+    default: () => 'CURRENT_TIMESTAMP(6)',
   })
   public createdAt: Date;
 
-  @ApiProperty({ description: 'User update timestamp' })
-  @Column({
+  @ApiProperty({ description: 'Research update timestamp' })
+  @UpdateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP()',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   public updatedAt: Date;
 
-  @ApiProperty({ description: 'User deletion timestamp' })
+  @ApiProperty({ description: 'Research deletion timestamp' })
   @DeleteDateColumn({
     type: 'timestamp',
   })

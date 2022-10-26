@@ -2,9 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import {
   Column,
+  CreateDateColumn,
   DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { UserRole } from './user.role';
 
@@ -54,16 +56,17 @@ export class User {
   public description: string;
 
   @ApiProperty({ description: 'User creation timestamp' })
-  @Column({
+  @CreateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP()',
+    default: () => 'CURRENT_TIMESTAMP(6)',
   })
   public createdAt: Date;
 
   @ApiProperty({ description: 'User update timestamp' })
-  @Column({
+  @UpdateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP()',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   public updatedAt: Date;
 

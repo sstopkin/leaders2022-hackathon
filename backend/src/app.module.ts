@@ -8,6 +8,7 @@ import { ResearchModule } from './modules/research/research.module';
 import { DicomModule } from './modules/dicom/dicom.module';
 import * as _ from 'lodash';
 import * as process from 'process';
+import { S3Module } from 'nestjs-s3';
 
 @Module({
   imports: [
@@ -24,6 +25,20 @@ import * as process from 'process';
       password: process.env.POSTGRES_PASSWORD,
       synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true',
       autoLoadEntities: true,
+    }),
+    S3Module.forRootAsync({
+      useFactory: () => ({
+        config: {
+          credentials: {
+            accessKeyId: `${process.env.S3_ACCESS_KEY}`,
+            secretAccessKey: `${process.env.S3_SECRET_KEY}`,
+          },
+          endpoint: `${process.env.S3_URL}`,
+          s3ForcePathStyle: true,
+          signatureVersion: 'v4',
+          // region: `${process.env.S3_REGION}`,
+        },
+      }),
     }),
     AuthModule,
     UserModule,
