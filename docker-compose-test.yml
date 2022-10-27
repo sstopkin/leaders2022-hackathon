@@ -1,0 +1,76 @@
+version: '3.7'
+
+services:
+  backend:
+    build: backend/
+    hostname: backend-test
+    container_name: backend-test
+    env_file:
+      - backend/ops-tools/environments/test/.env
+    ports:
+      - 8080:8080
+    networks:
+      - demo_network
+    depends_on:
+      - db
+      - s3
+
+  frontend:
+    build: frontend/
+    hostname: frontend-test
+    container_name: frontend-test
+    ports:
+      - 8081:8081
+    networks:
+      - demo_network
+
+  db:
+    restart: always
+    image: postgres:14-alpine
+    hostname: db
+    container_name: db
+    environment:
+      POSTGRES_DB: hackathon_leaders2022
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/
+    ports:
+      - "5432:5432"
+    networks:
+      - demo_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+
+  s3:
+    restart: always
+    image: minio/minio
+    hostname: s3
+    container_name: s3
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: password
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - demo_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+    entrypoint: minio server /data --console-address ":9001"
+
+volumes:
+  postgres_data:
+    name: demo-pg-data
+  minio_data:
+    name: demo-s3-data
+
+networks:
+  demo_network:
+    driver: bridge
