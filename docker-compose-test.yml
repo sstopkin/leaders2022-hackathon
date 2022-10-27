@@ -20,7 +20,7 @@ services:
     build:
       context: frontend
       args:
-        REACT_APP_BACKEND_URL: "https://leaders2022-api.issart.com"
+        BACKEND_URL: "https://leaders2022-api.issart.com"
     hostname: frontend-test
     container_name: frontend-test
     ports:
