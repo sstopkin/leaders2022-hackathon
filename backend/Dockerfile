@@ -5,10 +5,12 @@ ENV NODE_ENV build
 USER node
 WORKDIR /home/node
 
-COPY package*.json yarn.lock ./
-RUN yarn install
+COPY --chown=node:node package*.json tsconfig.json tsconfig.build.json yarn.lock ./
 
-COPY --chown=node:node . .
+RUN yarn install --frozen-lockfile
+
+COPY --chown=node:node src ./src
+
 RUN yarn build
 
 
