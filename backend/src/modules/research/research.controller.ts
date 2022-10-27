@@ -25,8 +25,8 @@ import { FindAllOptionsDto } from '../../core/dto/find_all/find_all_options.dto'
 import { ApiPaginatedResponse } from '../../core/api_docs/api_paginated_response';
 import { isQueryFailedError, PostgresErrorCode } from '../../core/db/db_errors';
 
-@Controller('research')
-@ApiTags('Research')
+@Controller('researches')
+@ApiTags('Researches')
 @ApiBearerAuth()
 export class ResearchController {
   private readonly logger = new Logger(ResearchController.name);

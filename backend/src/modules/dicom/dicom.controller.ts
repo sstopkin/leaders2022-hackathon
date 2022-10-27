@@ -1,45 +1,67 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Redirect,
+  UseGuards,
 } from '@nestjs/common';
 import { DicomService } from './dicom.service';
 import { CreateDicomDto } from './dto/create-dicom.dto';
 import { UpdateDicomDto } from './dto/update-dicom.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import RoleGuard from '../auth/guards/role.guard';
+import { UserRole } from '../user/entities/user.role';
+import { ApiPaginatedResponse } from '../../core/api_docs/api_paginated_response';
+import { Research } from '../research/entities/research.entity';
+import { FindAllDicomDto } from './dto/find-all-dicom.dto';
 
-@Controller('dicom')
-@ApiTags('Dicom')
+@Controller('dicoms')
+@ApiTags('Dicoms')
 @ApiBearerAuth()
 export class DicomController {
   constructor(private readonly dicomService: DicomService) {}
 
-  @Post()
-  create(@Body() createDicomDto: CreateDicomDto) {
-    return this.dicomService.create(createDicomDto);
+  @Get()
+  @ApiPaginatedResponse(Research)
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
+  findAll(@Query() options: FindAllDicomDto) {
+    return this.dicomService.findAll(options);
   }
 
-  @Get()
-  findAll() {
-    return this.dicomService.findAll();
+  @Get('redirect')
+  @Redirect('', HttpStatus.FOUND)
+  async redirectToPublicUrl(@Query('path') path: string) {
+    const redirectUrl = await this.dicomService.makeRedirectPublicUrl(path);
+    return { url: redirectUrl };
   }
 
   @Get(':id')
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
   findOne(@Param('id') id: string) {
-    return this.dicomService.findOne(+id);
+    return this.dicomService.findOne(id);
+  }
+
+  @Post()
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER], true))
+  create(@Body() createDicomDto: CreateDicomDto) {
+    return this.dicomService.createOrUpdate(createDicomDto);
   }
 
   @Patch(':id')
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER], true))
   update(@Param('id') id: string, @Body() updateDicomDto: UpdateDicomDto) {
-    return this.dicomService.update(+id, updateDicomDto);
+    return this.dicomService.update(id, updateDicomDto);
   }
 
   @Delete(':id')
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
   remove(@Param('id') id: string) {
-    return this.dicomService.remove(+id);
+    return this.dicomService.softDelete(id);
   }
 }

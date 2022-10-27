@@ -68,14 +68,6 @@ export class ResearchService {
     });
   }
 
-  async getResearchOrError(id: string): Promise<Research> {
-    const research = await this.repository.findOneBy({ id: id });
-    if (!research) {
-      throw new BadRequestException('Research does not exist');
-    }
-    return research;
-  }
-
   async update(id: string, dto: UpdateResearchDto): Promise<Research> {
     const research = await this.findResearchOrThrowException(id);
     if (!!dto.name) {
@@ -85,6 +77,7 @@ export class ResearchService {
       research.description = dto.description;
     }
     if (!!dto.status) {
+      // TODO add validation of status flow
       research.status = dto.status;
     }
 

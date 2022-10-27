@@ -15,8 +15,6 @@ export class CloudService {
     private appConfigService: AppConfigService,
   ) {}
 
-  ORIGINAL_PREFIX = 'original';
-  GENERATED_PREFIX = 'generated';
   DICOMS_PREFIX = 'dicoms';
   IMAGES_PREFIX = 'images';
 
@@ -102,9 +100,9 @@ export class CloudService {
       .promise();
   }
 
-  makePublicUrl(researchId: string, prefix: string, fileName: string): string {
+  makePublicUrl(path: string): string {
     return encodeURI(
-      `${this.appConfigService.API_EXTERNAL_URI}/decoms/redirect/?path=${researchId}/${prefix}/${fileName}`,
+      `${this.appConfigService.API_EXTERNAL_URI}/${this.DICOMS_PREFIX}/redirect/?path=${path}`,
     );
   }
 }

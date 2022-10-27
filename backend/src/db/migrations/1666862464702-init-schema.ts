@@ -1,26 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class initSchema1666782366176 implements MigrationInterface {
-  name = 'initSchema1666782366176';
+export class initSchema1666862464702 implements MigrationInterface {
+  name = 'initSchema1666862464702';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-            CREATE TYPE "public"."dicoms_dicomtype_enum" AS ENUM('original', 'generated')
-        `);
-    await queryRunner.query(`
-            CREATE TABLE "dicoms" (
-                "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-                "name" character varying NOT NULL,
-                "description" character varying,
-                "dicomType" "public"."dicoms_dicomtype_enum" NOT NULL DEFAULT 'original',
-                "isUploaded" boolean NOT NULL DEFAULT false,
-                "createdAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone,
-                "updatedAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone,
-                "deletedAt" TIMESTAMP,
-                "researchId" uuid,
-                CONSTRAINT "PK_3d7bce9ed82037c262056d331ac" PRIMARY KEY ("id")
-            )
-        `);
     await queryRunner.query(`
             CREATE TYPE "public"."researches_status_enum" AS ENUM('created', 'uploading', 'uploaded', 'generated')
         `);
@@ -35,6 +18,27 @@ export class initSchema1666782366176 implements MigrationInterface {
                 "deletedAt" TIMESTAMP,
                 CONSTRAINT "PK_dc5bf1f6e68778d8f193f6e9d54" PRIMARY KEY ("id")
             )
+        `);
+    await queryRunner.query(`
+            CREATE TYPE "public"."dicoms_dicomtype_enum" AS ENUM('original', 'generated')
+        `);
+    await queryRunner.query(`
+            CREATE TABLE "dicoms" (
+                "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+                "name" character varying NOT NULL,
+                "description" character varying,
+                "dicomType" "public"."dicoms_dicomtype_enum" NOT NULL DEFAULT 'original',
+                "isUploaded" boolean NOT NULL DEFAULT false,
+                "researchId" uuid NOT NULL,
+                "markup" json,
+                "createdAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone,
+                "updatedAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone,
+                "deletedAt" TIMESTAMP,
+                CONSTRAINT "PK_3d7bce9ed82037c262056d331ac" PRIMARY KEY ("id")
+            )
+        `);
+    await queryRunner.query(`
+            CREATE INDEX "dicomsResearchIdIdx" ON "dicoms" ("researchId")
         `);
     await queryRunner.query(`
             CREATE TYPE "public"."users_role_enum" AS ENUM('admin', 'user')
@@ -74,16 +78,19 @@ export class initSchema1666782366176 implements MigrationInterface {
             DROP TYPE "public"."users_role_enum"
         `);
     await queryRunner.query(`
-            DROP TABLE "researches"
-        `);
-    await queryRunner.query(`
-            DROP TYPE "public"."researches_status_enum"
+            DROP INDEX "public"."dicomsResearchIdIdx"
         `);
     await queryRunner.query(`
             DROP TABLE "dicoms"
         `);
     await queryRunner.query(`
             DROP TYPE "public"."dicoms_dicomtype_enum"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "researches"
+        `);
+    await queryRunner.query(`
+            DROP TYPE "public"."researches_status_enum"
         `);
   }
 }

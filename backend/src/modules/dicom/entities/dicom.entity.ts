@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -11,6 +12,8 @@ import {
 } from 'typeorm';
 import { DicomType } from './dicom.type';
 import { Research } from '../../research/entities/research.entity';
+import { IsOptional } from 'class-validator';
+import { DicomMarkup } from './dicom-markup';
 
 @Entity({ name: 'dicoms' })
 export class Dicom {
@@ -47,6 +50,14 @@ export class Dicom {
   @ManyToOne(() => Research, (research) => research.dicoms)
   @JoinColumn({ name: 'researchId', referencedColumnName: 'id' })
   public research: Research;
+
+  @Column()
+  @Index('dicomsResearchIdIdx')
+  researchId: string;
+
+  @Column({ type: 'json', nullable: true })
+  @IsOptional()
+  public markup?: DicomMarkup;
 
   @ApiProperty({ description: 'Research creation timestamp' })
   @CreateDateColumn({

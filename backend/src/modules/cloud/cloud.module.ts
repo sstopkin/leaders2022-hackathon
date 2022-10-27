@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CloudService } from './cloud.service';
-import { SqsModule, SqsService } from '@nestjs-packages/sqs';
+import { AppConfigService } from '../../core/config';
 
 @Module({
-  imports: [SqsModule],
-  exports: [CloudService, SqsService],
-  providers: [CloudService, SqsService],
+  imports: [],
+  exports: [CloudService],
+  providers: [CloudService, AppConfigService],
 })
 export class CloudModule {}
