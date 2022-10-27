@@ -4,8 +4,6 @@ services:
   backend:
     build:
       context: backend
-      args:
-        REACT_APP_BACKEND_URL: "https://leaders2022-api.issart.com/api"
     hostname: backend-test
     container_name: backend-test
     env_file:
@@ -19,7 +17,10 @@ services:
       - s3
 
   frontend:
-    build: frontend/
+    build:
+      context: frontend
+      args:
+        REACT_APP_BACKEND_URL: "https://leaders2022-api.issart.com/api"
     hostname: frontend-test
     container_name: frontend-test
     ports:
