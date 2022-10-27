@@ -6,7 +6,7 @@ services:
     hostname: backend-local
     container_name: backend-local
     env_file:
-      - backend/environments/local/.env
+      - backend/ops-tools/environments/local/.env
     ports:
       - 8080:8080
     networks:
