@@ -1,29 +1,6 @@
 version: '3.7'
 
 services:
-  backend:
-    build: backend/
-    hostname: backend-local
-    container_name: backend-local
-    env_file:
-      - backend/ops-tools/environments/local/.env
-    ports:
-      - 8080:8080
-    networks:
-      - demo_network
-    depends_on:
-      - db
-      - s3
-
-  frontend:
-    build: frontend/
-    hostname: frontend-local
-    container_name: frontend-local
-    ports:
-      - 8081:8081
-    networks:
-      - demo_network
-
   db:
     restart: always
     image: postgres:14-alpine

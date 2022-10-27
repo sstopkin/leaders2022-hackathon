@@ -2,7 +2,10 @@ version: '3.7'
 
 services:
   backend:
-    build: backend/
+    build:
+      context: backend
+      args:
+        REACT_APP_BACKEND_URL: "https://leaders2022-api.issart.com/api"
     hostname: backend-test
     container_name: backend-test
     env_file:
