@@ -17,8 +17,8 @@ services:
 
   frontend:
     build: frontend/
-    hostname: backend-local
-    container_name: backend-local
+    hostname: frontend-local
+    container_name: frontend-local
     ports:
       - 8081:8081
     networks:
