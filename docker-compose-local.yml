@@ -30,7 +30,7 @@ services:
     hostname: db
     container_name: db
     environment:
-      POSTGRES_DB: postgres
+      POSTGRES_DB: hackathon_leaders2022
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
