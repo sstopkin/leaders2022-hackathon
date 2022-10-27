@@ -5,10 +5,9 @@ import {
     ErrorComponent,
     Icons,
 } from "@pankod/refine-antd";
-
 import "@pankod/refine-antd/dist/styles.min.css";
 import routerProvider from "@pankod/refine-react-router-v6";
-import dataProvider from "@pankod/refine-simple-rest";
+import dataProvider from "@pankod/refine-nestjsx-crud";
 import {authProvider} from "./authProvider";
 import {UsersList, UsersCreate, UsersEdit, UsersShow} from "pages/users";
 import {ResearchesCreate, ResearchesList, ResearchesShow} from "./pages/researches/";
