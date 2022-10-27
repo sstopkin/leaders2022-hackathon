@@ -10,7 +10,7 @@ services:
     hostname: ${APP_NAME}-backend-local
     container_name: ${APP_NAME}-backend-local
     env_file:
-      - ops-tools/environments/local/.env
+      - backend/ops-tools/environments/local/.env
     networks:
       - network
     ports:
