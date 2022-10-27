@@ -6,7 +6,7 @@ services:
     hostname: backend-local
     container_name: backend-local
     env_file:
-      - backend/environments/local/.env
+      - backend/ops-tools/environments/local/.env
     ports:
       - 8080:8080
     networks:
@@ -30,7 +30,7 @@ services:
     hostname: db
     container_name: db
     environment:
-      POSTGRES_DB: postgres
+      POSTGRES_DB: hackathon_leaders2022
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
