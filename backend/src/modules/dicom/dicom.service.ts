@@ -75,8 +75,11 @@ export class DicomService {
     const existedDicom = await this.dicomRepository
       .createQueryBuilder('Dicom')
       .where('Dicom.researchId = :researchId', { researchId: research.id })
-      .andWhere('Dicom.name = :name', {
-        name: createDicomDto.name,
+      .andWhere('Dicom.name = :dicomName', {
+        dicomName: createDicomDto.name,
+      })
+      .andWhere('Dicom.dicomType = :dicomType', {
+        dicomType: createDicomDto.dicomType,
       })
       .getOne();
 
