@@ -54,6 +54,7 @@ export const UsersEdit: React.FC<IResourceComponentsProps> = () => {
           rules={[
             {
               required: true,
+              type: "email"
             },
             {
               min: 5,
@@ -69,6 +70,13 @@ export const UsersEdit: React.FC<IResourceComponentsProps> = () => {
             {
               required: true,
             },
+            {
+              min: 1,
+              max: 50
+            },
+            {
+              pattern: new RegExp('^[a-zA-Z-]*$')
+            }
           ]}
         >
           <Input />
@@ -80,6 +88,13 @@ export const UsersEdit: React.FC<IResourceComponentsProps> = () => {
             {
               required: true,
             },
+            {
+              min: 1,
+              max: 50
+            },
+            {
+              pattern: new RegExp('^[a-zA-Z-]*$')
+            }
           ]}
         >
           <Input />

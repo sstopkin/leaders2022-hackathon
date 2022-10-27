@@ -46,6 +46,13 @@ export const UsersCreate: React.FC<IResourceComponentsProps> = () => {
             {
               required: true,
             },
+            {
+              min: 1,
+              max: 50
+            },
+            {
+              pattern: new RegExp('^[a-zA-Z-]*$')
+            }
           ]}
         >
           <Input />
@@ -57,6 +64,13 @@ export const UsersCreate: React.FC<IResourceComponentsProps> = () => {
             {
               required: true,
             },
+            {
+              min: 1,
+              max: 50
+            },
+            {
+              pattern: new RegExp('^[a-zA-Z-]*$')
+            }
           ]}
         >
           <Input />

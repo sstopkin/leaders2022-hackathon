@@ -21,7 +21,10 @@ export const UsersShow: React.FC<IResourceComponentsProps> = () => {
   const { data: permissionsData } = usePermissions();
 
   return (
-    <Show canEdit={permissionsData?.includes(Roles.ADMIN)} isLoading={isLoading}>
+    <Show
+      canEdit={permissionsData?.includes(Roles.ADMIN)}
+      isLoading={isLoading}
+    >
       <Title level={5}>{t("users.fields.email")}</Title>
       <Typography.Text>
         <Icons.MailOutlined /> {record?.email}

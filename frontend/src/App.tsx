@@ -65,6 +65,7 @@ function App() {
             notificationProvider={notificationProvider}
             ReadyPage={ReadyPage}
             catchAll={<ErrorComponent/>}
+            warnWhenUnsavedChanges
             routerProvider={{
                 ...routerProvider,
                 routes: [
