@@ -76,12 +76,14 @@ services:
       - minio
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 root ZGzoD9iZSpHuVaufnmog3vZldNVCuZmVT6sMPHaekIc274jKeLzxRcANr8Z4ld1h;
+      /usr/bin/mc config host add minio http://minio:9000 root ZGzoD9iZSpHuVaufnmog3vZldNVCuZmVT6sMPHaekIc274jKeLzxRcANr8Z4ld1h;
       /usr/bin/mc rm -r --force myminio/hackathon-leaders2022;
       /usr/bin/mc mb myminio/hackathon-leaders2022;
       /usr/bin/mc policy download myminio/hackathon-leaders2022;
       exit 0;
       "
+    networks:
+      - demo_network
 
 volumes:
   postgres_data:
