@@ -13,6 +13,13 @@ import { ResearchStatus } from './entities/research.status';
 
 @Injectable()
 export class ResearchService {
+  private readonly availableStatusChanges: Array<string> = [
+    `${ResearchStatus.CREATED}-${ResearchStatus.UPLOADING}`,
+    `${ResearchStatus.UPLOADING}-${ResearchStatus.UPLOADED}`,
+    `${ResearchStatus.UPLOADED}-${ResearchStatus.GENERATING}`,
+    `${ResearchStatus.GENERATING}-${ResearchStatus.GENERATED}`,
+  ];
+
   public constructor(
     @InjectRepository(Research)
     private readonly repository: Repository<Research>,
@@ -77,7 +84,7 @@ export class ResearchService {
       research.description = dto.description;
     }
     if (!!dto.status) {
-      // TODO add validation of status flow
+      this.validateStatusChanging(research.status, dto.status);
       research.status = dto.status;
     }
 
@@ -95,5 +102,18 @@ export class ResearchService {
       throw new BadRequestException('Research does not exist');
     }
     return research;
+  }
+
+  validateStatusChanging(
+    currentStatus: ResearchStatus,
+    newStatus: ResearchStatus,
+  ) {
+    if (
+      !this.availableStatusChanges.includes(`${currentStatus}-${newStatus}`)
+    ) {
+      throw new BadRequestException(
+        `Not valid operation of changing status '${currentStatus}' on '${newStatus}'`,
+      );
+    }
   }
 }
