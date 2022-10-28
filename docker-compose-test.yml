@@ -14,7 +14,7 @@ services:
       - demo_network
     depends_on:
       - db
-      - s3
+      - minio
 
   frontend:
     build:
@@ -48,11 +48,11 @@ services:
       options:
         max-size: "500m"
 
-  s3:
+  minio:
     restart: always
     image: minio/minio
-    hostname: s3
-    container_name: s3
+    hostname: minio
+    container_name: minio
     environment:
       MINIO_ROOT_USER: root
       MINIO_ROOT_PASSWORD: ZGzoD9iZSpHuVaufnmog3vZldNVCuZmVT6sMPHaekIc274jKeLzxRcANr8Z4ld1h
@@ -68,13 +68,26 @@ services:
       driver: "json-file"
       options:
         max-size: "500m"
-    entrypoint: mkdir -p "/data/hackathon-leaders2022" && minio server /data --address ":9000" --console-address ":9001"
+    entrypoint: minio server /data --address ":9000" --console-address ":9001"
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 root ZGzoD9iZSpHuVaufnmog3vZldNVCuZmVT6sMPHaekIc274jKeLzxRcANr8Z4ld1h;
+      /usr/bin/mc rm -r --force myminio/hackathon-leaders2022;
+      /usr/bin/mc mb myminio/hackathon-leaders2022;
+      /usr/bin/mc policy download myminio/hackathon-leaders2022;
+      exit 0;
+      "
 
 volumes:
   postgres_data:
     name: demo-pg-data
   minio_data:
-    name: demo-s3-data
+    name: demo-minio-data
 
 networks:
   demo_network:

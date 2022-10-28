@@ -54,7 +54,7 @@ async function bootstrap() {
     createSwagger(app);
   }
 
-  app.use(json({ limit: '500mb' }));
+  app.use(json({ limit: '500mb' })); // TODO move to config
   app.use(
     helmet({
       crossOriginResourcePolicy: false,
