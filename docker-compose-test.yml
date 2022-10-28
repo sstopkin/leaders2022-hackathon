@@ -58,7 +58,7 @@ services:
       MINIO_SECRET_KEY: iouuODpiSNpVwjrSyOc7rXXwVw1Ea8gYkf25xGaN1oQQQnBZZnbEW3oBmGrapgHz
       MINIO_ROOT_USER: root
       MINIO_ROOT_PASSWORD: ZGzoD9iZSpHuVaufnmog3vZldNVCuZmVT6sMPHaekIc274jKeLzxRcANr8Z4ld1h
-      MINIO_BROWSER_REDIRECT_URL: 172.17.10.19
+      MINIO_BROWSER_REDIRECT_URL: "http://172.17.10.19:9001"
     volumes:
       - minio_data:/data
     ports:
