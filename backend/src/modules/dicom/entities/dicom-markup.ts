@@ -12,15 +12,22 @@ export class MarkupPoint {
   readonly y: number;
 }
 
+export class MarkupPolygon {
+  @ApiProperty({ isArray: true, type: MarkupPoint })
+  @IsNotEmpty()
+  @Type(() => MarkupPoint)
+  readonly vertices: MarkupPoint[];
+}
+
 export class MarkupImage {
   @ApiProperty()
   @IsNotEmpty()
   readonly imageId: string;
 
-  @ApiProperty({ isArray: true, type: MarkupPoint })
+  @ApiProperty({ isArray: true, type: MarkupPolygon })
   @IsNotEmpty()
-  @Type(() => MarkupPoint)
-  readonly polygon: MarkupPoint[];
+  @Type(() => MarkupPolygon)
+  readonly polygons: MarkupPolygon[];
 }
 
 export class DicomMarkup {

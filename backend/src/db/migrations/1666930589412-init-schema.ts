@@ -1,11 +1,17 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class initSchema1666862464702 implements MigrationInterface {
-  name = 'initSchema1666862464702';
+export class initSchema1666930589412 implements MigrationInterface {
+  name = 'initSchema1666930589412';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-            CREATE TYPE "public"."researches_status_enum" AS ENUM('created', 'uploading', 'uploaded', 'generated')
+            CREATE TYPE "public"."researches_status_enum" AS ENUM(
+                'created',
+                'uploading',
+                'uploaded',
+                'generating',
+                'generated'
+            )
         `);
     await queryRunner.query(`
             CREATE TABLE "researches" (
@@ -39,6 +45,9 @@ export class initSchema1666862464702 implements MigrationInterface {
         `);
     await queryRunner.query(`
             CREATE INDEX "dicomsResearchIdIdx" ON "dicoms" ("researchId")
+        `);
+    await queryRunner.query(`
+            CREATE UNIQUE INDEX "dicomsResearchIdNameDicomTypeUniqueIdx" ON "dicoms" ("researchId", "name", "dicomType")
         `);
     await queryRunner.query(`
             CREATE TYPE "public"."users_role_enum" AS ENUM('admin', 'user')
@@ -76,6 +85,9 @@ export class initSchema1666862464702 implements MigrationInterface {
         `);
     await queryRunner.query(`
             DROP TYPE "public"."users_role_enum"
+        `);
+    await queryRunner.query(`
+            DROP INDEX "public"."dicomsResearchIdNameDicomTypeUniqueIdx"
         `);
     await queryRunner.query(`
             DROP INDEX "public"."dicomsResearchIdIdx"

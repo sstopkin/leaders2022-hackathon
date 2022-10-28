@@ -16,6 +16,13 @@ import { IsOptional } from 'class-validator';
 import { DicomMarkup } from './dicom-markup';
 
 @Entity({ name: 'dicoms' })
+@Index(
+  'dicomsResearchIdNameDicomTypeUniqueIdx',
+  ['researchId', 'name', 'dicomType'],
+  {
+    unique: true,
+  },
+)
 export class Dicom {
   @ApiProperty({
     description: 'ID',
