@@ -40,7 +40,7 @@ export const ResearchesCreate: React.FC<IResourceComponentsProps> = () => {
                         },
                     ]}
                 >
-                    <Upload.Dragger name="file" accept=".jpg" listType="picture-card" maxCount={1}>
+                    <Upload.Dragger name="file" accept="*" listType="picture-card" maxCount={1}>
                         <p className="ant-upload-text">Drag & Drop a file in this area</p>
                     </Upload.Dragger>
                 </Form.Item>

@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppConfigService, validationSchema } from './core/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LoggerMiddleware } from './core/logger/logger.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user';
 import { ResearchModule } from './modules/research/research.module';
@@ -48,4 +49,8 @@ import { S3Module } from 'nestjs-s3';
   controllers: [],
   providers: [AppConfigService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
