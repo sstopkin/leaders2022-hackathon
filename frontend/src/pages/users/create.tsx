@@ -119,12 +119,8 @@ export const UsersCreate: React.FC<IResourceComponentsProps> = () => {
                 value: "admin",
               },
               {
-                label: t("users.fields.roles.operator"),
-                value: "operator",
-              },
-              {
-                label: t("users.fields.roles.partner"),
-                value: "partner",
+                label: t("users.fields.roles.user"),
+                value: "user",
               }
             ]}
           />
