@@ -36,7 +36,7 @@ services:
     environment:
       POSTGRES_DB: hackathon_leaders2022
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: xGMeDjwx8o51qFPhAKl3eiJDqaUeP0n3cNAGaEpj0GAoJKojjJpCHDQnXTB2ea5d%
     volumes:
       - postgres_data:/var/lib/postgresql/
     ports:
@@ -55,7 +55,10 @@ services:
     container_name: s3
     environment:
       MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: password
+      MINIO_SECRET_KEY: iouuODpiSNpVwjrSyOc7rXXwVw1Ea8gYkf25xGaN1oQQQnBZZnbEW3oBmGrapgHz
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: ZGzoD9iZSpHuVaufnmog3vZldNVCuZmVT6sMPHaekIc274jKeLzxRcANr8Z4ld1h
+      MINIO_BROWSER_REDIRECT_URL: 172.17.10.19
     volumes:
       - minio_data:/data
     ports:
@@ -67,7 +70,7 @@ services:
       driver: "json-file"
       options:
         max-size: "500m"
-    entrypoint: minio server /data #--console-address ":9001"
+    entrypoint: minio server /data --address ":9000" --console-address ":9001"
 
 volumes:
   postgres_data:
