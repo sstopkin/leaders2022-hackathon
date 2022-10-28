@@ -54,8 +54,6 @@ services:
     hostname: s3
     container_name: s3
     environment:
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: iouuODpiSNpVwjrSyOc7rXXwVw1Ea8gYkf25xGaN1oQQQnBZZnbEW3oBmGrapgHz
       MINIO_ROOT_USER: root
       MINIO_ROOT_PASSWORD: ZGzoD9iZSpHuVaufnmog3vZldNVCuZmVT6sMPHaekIc274jKeLzxRcANr8Z4ld1h
       MINIO_BROWSER_REDIRECT_URL: "http://172.17.10.19:9001"
@@ -70,7 +68,7 @@ services:
       driver: "json-file"
       options:
         max-size: "500m"
-    entrypoint: minio server /data --address ":9000" --console-address ":9001"
+    entrypoint: mkdir -p "/data/hackathon-leaders2022" && minio server /data --address ":9000" --console-address ":9001"
 
 volumes:
   postgres_data:

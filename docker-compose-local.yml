@@ -27,8 +27,8 @@ services:
     hostname: s3
     container_name: s3
     environment:
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: password
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: password
     volumes:
       - minio_data:/data
     ports:
