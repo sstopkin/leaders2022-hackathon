@@ -9,7 +9,7 @@ import {
 
 import "react-mde/lib/styles/css/react-mde-all.css";
 
-import { IUser } from "interfaces"; //IFactory
+import { IUser } from "interfaces";
 import ReactMde from "react-mde";
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";

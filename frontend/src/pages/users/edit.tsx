@@ -11,7 +11,7 @@ import {
 
 import "react-mde/lib/styles/css/react-mde-all.css";
 
-import { IUser } from "interfaces"; //IFactory
+import { IUser } from "interfaces";
 import ReactMarkdown from "react-markdown";
 import ReactMde from "react-mde";
 
@@ -147,7 +147,7 @@ export const UsersEdit: React.FC<IResourceComponentsProps> = () => {
           <Checkbox>Active</Checkbox>
         </Form.Item>
         <Form.Item
-          label={t("projects.fields.description")}
+          label={t("users.fields.description")}
           name="description"
         >
           <ReactMde

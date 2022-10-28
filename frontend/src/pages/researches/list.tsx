@@ -1,5 +1,5 @@
 import {
-    IResourceComponentsProps, useNavigation,
+    IResourceComponentsProps, useCustom, useNavigation,
     usePermissions,
     useTranslate,
 } from "@pankod/refine-core";
@@ -10,27 +10,14 @@ import {
     useTable,
     DateField,
     Space,
-    EditButton,
     DeleteButton,
     ShowButton,
     TagField,
-    Button, Icons,
+    Button, Icons, EditButton,
 } from "@pankod/refine-antd";
 import {IResearch} from "interfaces";
 import {Roles} from "interfaces/roles";
-import {DATE_FORMAT} from "../../constants";
-
-function formatBytes(bytes: number, decimals = 2) {
-    if (!+bytes) return '0 Bytes'
-
-    const k = 1024
-    const dm = decimals < 0 ? 0 : decimals
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
-}
+import {API_ROOT, DATE_FORMAT} from "../../constants";
 
 export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
@@ -45,6 +32,8 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
         ],
     });
 
+    console.log(tableProps)
+
     const {data: permissionsData} = usePermissions();
 
     return (
@@ -58,22 +47,10 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                     render={(value) => <TextField value={value}/>}
                 />
                 <Table.Column
-                    dataIndex="fileName"
-                    key="fileName"
+                    dataIndex="name"
+                    key="name"
                     title={t("researches.fields.name")}
                     render={(value) => <TextField value={value}/>}
-                />
-                <Table.Column
-                    dataIndex="fileName"
-                    key="fileName"
-                    title={t("researches.fields.name")}
-                    render={(value) => <TextField value={value}/>}
-                />
-                <Table.Column
-                    dataIndex="size"
-                    key="size"
-                    title={t("researches.fields.size")}
-                    render={(value) => <TextField value={formatBytes(value)}/>}
                 />
                 <Table.Column
                     dataIndex="status"
@@ -98,11 +75,22 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                     dataIndex="actions"
                     render={(_, record) => (
                         <Space>
-                            <Button onClick={() => navigate.push(`/researches/show/${record.id}`)} type="primary"
-                                    size="small">Разметить</Button>
+                            <ShowButton hideText size="small" recordItemId={record.id} />
+                            {(permissionsData?.includes(Roles.ADMIN)) && (
+                              <EditButton
+                                hideText
+                                size="small"
+                                recordItemId={record.id}
+                           />
+                            )}
                             {permissionsData?.includes(Roles.ADMIN) && (
                                 <DeleteButton hideText size="small" recordItemId={record.id}/>
                             )}
+                            {/* <Button onClick={() => navigate.push(`/researches/show/${record.id}`)} type="primary"
+                                    size="small">Разметить</Button>
+                            {permissionsData?.includes(Roles.ADMIN) && (
+                                <DeleteButton hideText size="small" recordItemId={record.id}/>
+                            )} */}
                         </Space>
                     )}
                 />

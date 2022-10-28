@@ -10,7 +10,7 @@ import routerProvider from "@pankod/refine-react-router-v6";
 import dataProvider from "@pankod/refine-nestjsx-crud";
 import {authProvider} from "./authProvider";
 import {UsersList, UsersCreate, UsersEdit, UsersShow} from "pages/users";
-import {ResearchesCreate, ResearchesList, ResearchesShow} from "./pages/researches/";
+import {ResearchesCreate, ResearchesEdit, ResearchesList, ResearchesShow} from "./pages/researches/";
 import {
     Title,
     Header,
@@ -113,7 +113,8 @@ function App() {
                     icon: <Icons.SnippetsOutlined/>,
                     list: ResearchesList,
                     show: ResearchesShow,
-                    create: ResearchesCreate
+                    create: ResearchesCreate,
+                    edit: ResearchesEdit
                 },
             ]}
             Title={Title}

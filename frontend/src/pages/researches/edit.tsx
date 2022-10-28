@@ -2,21 +2,25 @@ import {
     useTranslate,
     IResourceComponentsProps,
 } from "@pankod/refine-core";
-import {Create, Form, Input, useForm} from "@pankod/refine-antd";
+import {Edit, Form, Input, useForm} from "@pankod/refine-antd";
 import {IResearch} from "interfaces";
 import ReactMde from "react-mde";
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
 
-export const ResearchesCreate: React.FC<IResourceComponentsProps> = () => {
+export const ResearchesEdit: React.FC<IResourceComponentsProps> = () => {
     const [selectedTab, setSelectedTab] = useState<"write" | "preview">("write");
     const t = useTranslate();
 
-    const {formProps, saveButtonProps} = useForm<IResearch>();
+    const { formProps, saveButtonProps } = useForm<IResearch>();
 
     return (
-        <Create saveButtonProps={saveButtonProps}>
-            <Form {...formProps} layout="vertical">
+        <Edit saveButtonProps={saveButtonProps}>
+            <Form {...formProps}
+            initialValues={{
+                ...formProps.initialValues,
+            }}
+            layout="vertical">
                 <Form.Item
                     label={t("researches.fields.name")}
                     name="name"
@@ -52,6 +56,6 @@ export const ResearchesCreate: React.FC<IResourceComponentsProps> = () => {
                     />
                 </Form.Item>
             </Form>
-        </Create>
+        </Edit>
     );
 };

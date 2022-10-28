@@ -1,227 +1,197 @@
-import {IResourceComponentsProps, usePermissions, useShow, useTranslate,} from "@pankod/refine-core";
-import {Button, Typography} from "@pankod/refine-antd";
-import {IResearch} from "interfaces";
+/* eslint-disable react-hooks/rules-of-hooks */
+import {
+  useTranslate,
+  IResourceComponentsProps,
+  useOne,
+  useShow,
+  useUpdate,
+  useCustom,
+  usePermissions,
+} from "@pankod/refine-core";
+import {
+  Show,
+  Typography,
+  MarkdownField,
+  Table,
+  Button,
+  Icons,
+  Space,
+  ShowButton,
+  BooleanField,
+  DateField,
+  Row,
+  Col,
+} from "@pankod/refine-antd";
+
+import { IDicom, IResearch, IUser } from "interfaces";
+import { API_ROOT, DATE_FORMAT } from "../../constants";
+import FileOutlined from "@ant-design/icons/lib/icons/FileOutlined";
 import React from "react";
-import {Circle, Layer, Line, Stage, Text} from "react-konva";
-import Konva from "konva";
-import KonvaEventObject = Konva.KonvaEventObject;
+import { Roles } from "interfaces/roles";
+import { FileMarkdownOutlined } from "@ant-design/icons";
 
-const {Title} = Typography;
-
-type PointsGroup = Array<Array<{ x: number, y: number }>>;
-
-type Modes = 'POLYGON' | 'BRUSH' | 'RULER' | 'EDIT'
-
-const MODES: Array<Modes> = ['POLYGON', 'BRUSH', 'RULER', 'EDIT'];
+const { Title } = Typography;
 
 export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
-    const containerRef = React.useRef<null | HTMLDivElement>(null);
-    const isDrawing = React.useRef<boolean>(false);
-    const isRuler = React.useRef<boolean>(false);
-    const t = useTranslate();
+  const t = useTranslate();
 
-    const [pointsGroup, setPointsGroup] = React.useState<PointsGroup>([[]]);
-    const [drawLines, setDrawLines] = React.useState<Array<{ points: Array<number> }>>([]);
-    const [rulerLines, setRulerLines] = React.useState<Array<{ points: Array<number> }>>([])
-    const [activePointsGroupIndex, setActivePointsGroupIndex] = React.useState<number>(0);
-    const [selectedMode, setSelectedMode] = React.useState<Modes | undefined>(undefined);
+  const { data: permissionsData } = usePermissions();
 
-    const {queryResult} = useShow<IResearch>();
-    const {data, isLoading} = queryResult;
-    const record = data?.data;
+  const { queryResult } = useShow<IResearch>();
+  const { data, isLoading } = queryResult;
+  const record = data?.data;
 
-    const {data: permissionsData} = usePermissions();
+  const { mutate } = useUpdate();
 
-    const containerSize: { width: number, height: number } = React.useMemo(() => {
-        if (containerRef.current) {
-            return {width: containerRef.current?.clientWidth, height: containerRef.current?.clientHeight}
-        }
-        return {width: 0, height: 0}
-    }, [containerRef.current]);
+  // const { data: createdByInfo } = useOne<IUser>({
+  //   resource: "users",
+  //   id: (record?.userId as any) ?? "",
+  // });
 
-    const currentCursorType = () => {
-        switch (selectedMode) {
-            case "POLYGON":
-            case "EDIT":
-                return 'pointer';
-            case "RULER":
-            case "BRUSH":
-            default:
-                return "crosshair"
-        }
-    }
+  const { data: projectDicoms } = useCustom<IDicom>({
+    url: `${API_ROOT}/dicoms`,
+    method: "get",
+    config: {
+      query: {
+        researchId: record?.id,
+      },
+    },
+  });
 
-    const renderPanelButtons = () => {
-        return MODES.map((mode) => <Button
-            onClick={() => setSelectedMode(mode)}
-            style={{marginRight: '8px'}}
-            type={selectedMode === mode ? "primary" : "default"}>
-            {mode}
-        </Button>)
-    }
+  console.log(
+    "files:" +
+    JSON.stringify(projectDicoms)
+  );
 
-    const createNewPointsGroup = () => {
-        const currentPointsGroup = pointsGroup[activePointsGroupIndex];
-        const firstPoint = currentPointsGroup[0];
-        currentPointsGroup.push(firstPoint);
-        const newPointsGroup = pointsGroup;
-        newPointsGroup[activePointsGroupIndex] = currentPointsGroup;
+  // const filesData = projectDicoms?.data.data.map((files: IDicom) => ({
+  //   ...files,
+  // }));
 
-        setPointsGroup([...newPointsGroup, []]);
-        setActivePointsGroupIndex((prevIndex) => prevIndex + 1);
-    }
+  // console.log(
+  //   "files:" +
+  //   JSON.stringify(projectDicoms) +
+  //   " data:" +
+  //   JSON.stringify(filesData)
+  // );
 
-    const createPoint = (event: KonvaEventObject<MouseEvent>) => {
-        const stage = event.target.getStage();
-        if (stage) {
-            const newPointsGroup = pointsGroup;
-            const pointerPosition = stage?.getRelativePointerPosition();
-            const {x, y} = pointerPosition;
-            const newPolygon = newPointsGroup[activePointsGroupIndex];
-            newPolygon.push({x, y});
-            newPointsGroup[activePointsGroupIndex] = newPolygon;
-            setPointsGroup([...newPointsGroup]);
-        } else {
-            return
-        }
-    }
+// function formatBytes(bytes: number, decimals = 2) {
+//     if (!+bytes) return '0 Bytes'
 
-    const calculateLineWidth = (startPoint: { x: number, y: number }, endPoint: { x: number, y: number }) => {
-        const distance = Math.sqrt(Math.pow((endPoint.x - startPoint.x), 2) + Math.pow((endPoint.y - startPoint.y), 2));
-        return `${distance.toFixed(0)} px`
-    }
+//     const k = 1024
+//     const dm = decimals < 0 ? 0 : decimals
+//     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
-    const drawLine = (event: KonvaEventObject<MouseEvent>) => {
-        const stage = event.target.getStage();
-        if (stage) {
-            const point = stage.getRelativePointerPosition();
-            const lastLine = drawLines[drawLines.length - 1];
-            lastLine.points = lastLine.points.concat([point.x, point.y]);
+//     const i = Math.floor(Math.log(bytes) / Math.log(k))
 
-            drawLines.splice(drawLines.length - 1, 1, lastLine);
-            setDrawLines(drawLines.concat());
-        }
-    }
+//     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+// }
 
-    const drawRuler = (event: KonvaEventObject<MouseEvent>) => {
-        const stage = event.target.getStage();
-        if (stage) {
-            const point = stage.getRelativePointerPosition();
-            const lastRuler = rulerLines[rulerLines.length - 1];
-            if (lastRuler.points.length < 4) {
-                lastRuler.points.push(point.x);
-                lastRuler.points.push(point.y);
-            } else {
-                lastRuler.points[2] = point.x;
-                lastRuler.points[3] = point.y
-            }
-            rulerLines.splice(rulerLines.length - 1, 1, lastRuler)
-            setRulerLines(rulerLines.concat());
-        }
-    }
+// <Table.Column
+// dataIndex="size"
+// key="size"
+// title={t("researches.fields.size")}
+// render={(value) => <TextField value={formatBytes(value)}/>}
+// />
 
-    const handleMouseMove = (event: KonvaEventObject<MouseEvent>) => {
-        if (selectedMode === "BRUSH") {
-            if (isDrawing.current) {
-                drawLine(event)
-            }
-        }
-        if (selectedMode === 'RULER') {
-            if (isRuler.current) {
-                drawRuler(event)
-            }
-        }
-    }
+  return (
+    <>
+      <Show
+        isLoading={isLoading}
+        canEdit={permissionsData?.includes(Roles.ADMIN)}
+      >
+        <Row gutter={[16, 16]}>
+          <Col xl={5} lg={24} xs={24}>
+            <Title level={4}>{t("research.fields.name")}</Title>
+            <Typography.Text>{record?.name}</Typography.Text>
 
-    const handleMouseUp = (event: KonvaEventObject<MouseEvent>) => {
-        isDrawing.current = false;
-        isRuler.current = false
-    }
+            <Title level={5}>{t("research.fields.id")}</Title>
+            <Typography.Text>({record?.id})</Typography.Text>
+            
+            <Title level={5}>{t("research.fields.processingStatus")}</Title>
+            <Typography.Text>
+              {/* <ProjectProcessingStatus
+                status={record?.processingStatus || ""}
+              /> */}
+            </Typography.Text>
 
-    const handleMouseDown = (event: KonvaEventObject<MouseEvent>) => {
-        const numberOfClicks = event.evt.detail;
-        if (selectedMode === 'POLYGON') {
-            createPoint(event);
-            if (numberOfClicks === 2) {
-                createNewPointsGroup()
-            }
-        }
-        if (selectedMode === 'BRUSH') {
-            isDrawing.current = true;
-            const pos = event.target.getStage()?.getRelativePointerPosition();
-            if (pos) {
-                setDrawLines([...drawLines, {points: [pos.x, pos.y]}])
-            }
-        }
-        if (selectedMode === 'RULER') {
-            isRuler.current = true;
-            const pos = event.target.getStage()?.getRelativePointerPosition();
-            if (pos) {
-                setRulerLines([...rulerLines, {points: [pos.x, pos.y]}])
-            }
-        }
-    }
+            {/* <Title level={5}>{t("research.fields.createdBy")}</Title>
+            <Typography.Text>
+              {createdByInfo?.data.firstName} {createdByInfo?.data.lastName}
+            </Typography.Text> */}
 
-    const renderLine = (psG: PointsGroup) => {
-        return psG.map((pG, idx) => {
-            const linePoints: Array<number> = [];
-            pG.forEach(p => {
-                linePoints.push(p.x);
-                linePoints.push(p.y);
-            });
-            const points = pG.map((p, idx) => <Circle key={idx} radius={3} x={p.x}
-                                                      y={p.y} fill="none"
-                                                      stroke="green"/>);
-            return <><Line lineCap="round"
-                           lineJoin="round" stroke="green" fill="green" points={linePoints}/>
-                {idx === activePointsGroupIndex ? points : null}</>
-        })
-    }
+            <Title level={5}>{t("research.fields.description")}</Title>
+            <Typography.Text>
+              <MarkdownField value={record?.description} />
+            </Typography.Text>
 
-    return (
-        <div style={{height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: 'white'}}>
-            <div style={{padding: '12px'}}>
-                {renderPanelButtons()}
-            </div>
-            <div ref={containerRef} style={{flexGrow: 1}}>
-                <Stage onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}
-                       width={containerSize.width}
-                       height={containerSize.height}
-                       style={{cursor: currentCursorType(), backgroundColor: 'black'}}>
-                    <Layer>
-                        {renderLine(pointsGroup)}
-                        {drawLines.map((line, i) => (
-                            <Line key={i} points={line.points} stroke="green" strokeWidth={2} tension={0.5}
-                                  lineCap="round"
-                                  lineJoin="round"/>))}
-                        {rulerLines.map((line, i) => {
-                            const firstPoint = {x: line.points[0], y: line.points[1]};
-                            const lastPoint = {
-                                x: line.points[line.points.length - 2],
-                                y: line.points[line.points.length - 1]
-                            };
-                            return <><Circle key={`start-ruler-${i}`} radius={2} x={firstPoint.x}
-                                             y={firstPoint.y} fill="none"
-                                             stroke="red"/>
-                                <Line key={i} points={line.points} stroke="red" strokeWidth={2}
-                                      tension={0.5}
-                                      lineCap="round"
-                                      lineJoin="round"/>
-                                <Circle key={`end-ruler-${i}`} radius={2}
-                                        x={lastPoint.x}
-                                        y={lastPoint.y}
-                                        fill="none"
-                                        stroke="red"/><Text x={lastPoint.x + 10}
-                                                            y={lastPoint.y - 10}
-                                                            fill="red"
-                                                            textBaseline='bottom'
-                                                            fontSize={12}
-                                                            text={calculateLineWidth(firstPoint, lastPoint)}
-                                                            align='center'/></>
-                        })}
-                    </Layer>
-                </Stage>
-            </div>
-        </div>
-    );
+            {/* <ShowButton
+                        onClick={() => handleShowDicomViewerModal(record)}
+                        hideText
+                        size="small"
+                        recordItemId={'asd'}
+                      /> */}
+          </Col>
+          <Col xl={19} xs={24}>
+            <Title level={5}>{t("research.fields.files")}</Title>
+            <Table
+              // pagination={{
+              //   ...filesData?.pagination,
+              //   showSizeChanger: true,
+              // }}
+              // dataSource={filesData}
+            >
+              <Table.Column
+                dataIndex="fileName"
+                key="fileName"
+                title={t("files.fields.fileName")}
+              />
+              <Table.Column
+                dataIndex="id"
+                key="id"
+                title={t("files.fields.id")}
+              />
+              <Table.Column
+                dataIndex="createdAt"
+                key="createdAt"
+                title={t("files.fields.createdAt")}
+                render={(value) =>
+                  value ? (
+                    <DateField
+                      value={value ? value : ""}
+                      format={DATE_FORMAT}
+                    />
+                  ) : (
+                    "-"
+                  )
+                }
+              />
+              <Table.Column
+                dataIndex="isUploaded"
+                title={t("files.fields.isUploaded")}
+                render={(value) => {
+                  return <BooleanField value={value} />;
+                }}
+              />
+              <Table.Column<IDicom>
+                title={t("table.actions")}
+                dataIndex="actions"
+                render={(_, record) => (
+                  <Space>
+                    {/* {record.isUploaded && (
+                      <ShowButton
+                        onClick={() => handleShowDicomViewerModal(record)}
+                        hideText
+                        size="small"
+                        recordItemId={record.id}
+                      />
+                    )} */}
+                  </Space>
+                )}
+              />
+            </Table>
+          </Col>
+        </Row>
+      </Show>
+    </>
+  );
 };

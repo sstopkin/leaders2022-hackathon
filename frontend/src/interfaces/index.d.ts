@@ -20,11 +20,18 @@ export interface IUser {
 }
 
 export interface IResearch {
-    //TODO Field are not final
-    id: string,
-    fileName: string,
-    size: number,
-    status: ResearchStatus
+    id: string;
+    name: string;
+    description: string;
+    status: ResearchStatus;
     createdAt: Date;
     updatedAt: Date;
+    deletedAt: Date;
+}
+
+export interface IDicom {
+    id: string;
+    fileName: string;
+    size: number;
+    isUploaded: boolean;
 }
