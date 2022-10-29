@@ -3,7 +3,7 @@
     "login": {
       "signin": "Войти",
       "signup": "Зарегистрироваться",
-      "username": "Пользователь",
+      "username": "E-mail адрес",
       "password": "Пароль",
       "remember": "Запоминть",
       "forgotPassword": "Забыли пароль?",
@@ -62,7 +62,6 @@
       "updatedAt": "Обновлен",
       "role": "Роль",
       "isActive": "Активен",
-      "factory": "Компания",
       "description": "Описание",
       "roles": {
         "admin": "Администратор",
@@ -81,10 +80,30 @@
     "fields": {
       "id": "Id",
       "name": "Имя",
-      "fileId": "ID файла",
+      "description": "Описание",
+      "files": "Файлы",
       "status": "Статус",
       "createdAt": "Создан",
       "updatedAt": "Обновлен",
+      "size": "Размер"
+    },
+    "titles": {
+      "create": "Новое исследование",
+      "edit": "Редактировать исследование",
+      "list": "Список исследований",
+      "show": "Просмотр исследования"
+    }
+  },
+  "dicoms": {
+    "dicoms": "DICOM файлы",
+    "fields": {
+      "id": "Id",
+      "fileName": "Имя файла",
+      "fileId": "ID файла",
+      "processingStatus": "Статус",
+      "createdAt": "Создан",
+      "updatedAt": "Обновлен",
+      "isUploaded": "Загружен",
       "size": "Размер"
     },
     "titles": {

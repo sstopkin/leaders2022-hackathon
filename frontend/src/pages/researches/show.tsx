@@ -7,6 +7,7 @@ import {
   useUpdate,
   useCustom,
   usePermissions,
+  useNavigation,
 } from "@pankod/refine-core";
 import {
   Show,
@@ -34,6 +35,7 @@ const { Title } = Typography;
 
 export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
   const t = useTranslate();
+  const navigate = useNavigation();
 
   const { data: permissionsData } = usePermissions();
 
@@ -98,28 +100,24 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
       <Show
         isLoading={isLoading}
         canEdit={permissionsData?.includes(Roles.ADMIN)}
+        headerButtons={() => <Button type="primary" onClick={
+          () => navigate.push(`/dicom/create?researchId=${record?.id}`)
+        } icon={<Icons.UploadOutlined/>}>Загрузить исследование</Button>}
       >
         <Row gutter={[16, 16]}>
           <Col xl={5} lg={24} xs={24}>
-            <Title level={4}>{t("research.fields.name")}</Title>
+            <Title level={4}>{t("researches.fields.name")}</Title>
             <Typography.Text>{record?.name}</Typography.Text>
 
-            <Title level={5}>{t("research.fields.id")}</Title>
+            <Title level={5}>{t("researches.fields.id")}</Title>
             <Typography.Text>({record?.id})</Typography.Text>
             
-            <Title level={5}>{t("research.fields.processingStatus")}</Title>
-            <Typography.Text>
-              {/* <ProjectProcessingStatus
-                status={record?.processingStatus || ""}
-              /> */}
-            </Typography.Text>
-
-            {/* <Title level={5}>{t("research.fields.createdBy")}</Title>
+            {/* <Title level={5}>{t("researches.fields.createdBy")}</Title>
             <Typography.Text>
               {createdByInfo?.data.firstName} {createdByInfo?.data.lastName}
             </Typography.Text> */}
 
-            <Title level={5}>{t("research.fields.description")}</Title>
+            <Title level={5}>{t("researches.fields.description")}</Title>
             <Typography.Text>
               <MarkdownField value={record?.description} />
             </Typography.Text>
@@ -132,7 +130,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                       /> */}
           </Col>
           <Col xl={19} xs={24}>
-            <Title level={5}>{t("research.fields.files")}</Title>
+            <Title level={5}>{t("researches.fields.files")}</Title>
             <Table
               // pagination={{
               //   ...filesData?.pagination,
@@ -143,17 +141,22 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
               <Table.Column
                 dataIndex="fileName"
                 key="fileName"
-                title={t("files.fields.fileName")}
+                title={t("dicoms.fields.fileName")}
               />
               <Table.Column
                 dataIndex="id"
                 key="id"
-                title={t("files.fields.id")}
+                title={t("dicoms.fields.id")}
+              />
+              <Table.Column
+                dataIndex="processingStatus"
+                key="processingStatus"
+                title={t("dicoms.fields.processingStatus")}
               />
               <Table.Column
                 dataIndex="createdAt"
                 key="createdAt"
-                title={t("files.fields.createdAt")}
+                title={t("dicoms.fields.createdAt")}
                 render={(value) =>
                   value ? (
                     <DateField
@@ -167,7 +170,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
               />
               <Table.Column
                 dataIndex="isUploaded"
-                title={t("files.fields.isUploaded")}
+                title={t("dicoms.fields.isUploaded")}
                 render={(value) => {
                   return <BooleanField value={value} />;
                 }}

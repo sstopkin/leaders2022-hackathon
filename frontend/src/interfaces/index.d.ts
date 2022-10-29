@@ -23,7 +23,6 @@ export interface IResearch {
     id: string;
     name: string;
     description: string;
-    status: ResearchStatus;
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date;
@@ -31,6 +30,7 @@ export interface IResearch {
 
 export interface IDicom {
     id: string;
+    researchId: string;
     fileName: string;
     size: number;
     isUploaded: boolean;

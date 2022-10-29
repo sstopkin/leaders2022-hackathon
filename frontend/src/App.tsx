@@ -10,7 +10,8 @@ import routerProvider from "@pankod/refine-react-router-v6";
 import dataProvider from "@pankod/refine-nestjsx-crud";
 import {authProvider} from "./authProvider";
 import {UsersList, UsersCreate, UsersEdit, UsersShow} from "pages/users";
-import {ResearchesCreate, ResearchesEdit, ResearchesList, ResearchesShow} from "./pages/researches/";
+import {ResearchesCreate, ResearchesEdit, ResearchesList, ResearchesShow} from "./pages/researches";
+import { DicomsCreate, DicomsShow } from "pages/dicom";
 import {
     Title,
     Header,
@@ -46,10 +47,6 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-const AuthenticatedCustomPage = () => {
-    return <Authenticated>{/* <ImagesGallery /> */}</Authenticated>;
-};
-
 function App() {
     const {t, i18n} = useTranslation();
 
@@ -69,8 +66,12 @@ function App() {
                 ...routerProvider,
                 routes: [
                     {
-                        element: <AuthenticatedCustomPage/>,
-                        path: "/gallery",
+                        element: <Authenticated><DicomsCreate /></Authenticated>,
+                        path: "/dicom/create",
+                        layout: true,
+                    }, {
+                        element: <Authenticated><DicomsShow /></Authenticated>,
+                        path: "/dicom/show",
                         layout: true,
                     },
                 ],

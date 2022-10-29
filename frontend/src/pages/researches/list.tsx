@@ -21,7 +21,6 @@ import {API_ROOT, DATE_FORMAT} from "../../constants";
 
 export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
-    const navigate = useNavigation();
 
     const {tableProps} = useTable<IResearch>({
         initialSorter: [
@@ -37,8 +36,7 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
     const {data: permissionsData} = usePermissions();
 
     return (
-        <List headerButtons={() => <Button type="primary" onClick={() => navigate.push('/researches/create')}
-                                           icon={<Icons.UploadOutlined/>}>Загрузить исследование</Button>}>
+        <List>
             <Table {...tableProps} rowKey="id">
                 <Table.Column
                     dataIndex="id"
