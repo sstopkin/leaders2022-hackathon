@@ -1,11 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsEnum,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
 import { DicomMarkup } from '../entities/dicom-markup';
+import { DicomStatus } from '../entities/dicom.status';
 
 export class UpdateDicomDto {
   @ApiPropertyOptional({
@@ -25,4 +27,12 @@ export class UpdateDicomDto {
   @IsOptional()
   @ValidateNested({ each: true })
   public markup?: DicomMarkup;
+
+  @ApiPropertyOptional({
+    description: 'DICOM file status',
+    example: 'in_markup',
+  })
+  @IsOptional()
+  @IsEnum(DicomStatus)
+  public status?: DicomStatus;
 }

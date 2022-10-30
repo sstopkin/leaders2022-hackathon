@@ -65,13 +65,14 @@ export class ResearchService {
     return research;
   }
 
-  async create(dto: CreateResearchDto): Promise<void> {
+  async create(createdByUserId: string, dto: CreateResearchDto): Promise<void> {
     const researchId = uuidv4();
     await this.cloudService.putObject(`${researchId}/`);
     await this.repository.insert({
       ...dto,
       id: researchId,
       status: ResearchStatus.CREATED,
+      createdByUserId: createdByUserId,
     });
   }
 
