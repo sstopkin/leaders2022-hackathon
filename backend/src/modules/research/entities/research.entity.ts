@@ -4,12 +4,16 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ResearchStatus } from './research.status';
 import { Dicom } from '../../dicom/entities/dicom.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity({ name: 'researches' })
 export class Research {
@@ -45,6 +49,15 @@ export class Research {
     default: ResearchStatus.CREATED,
   })
   public status: ResearchStatus;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'createdByUserId', referencedColumnName: 'id' })
+  public createdBy: User;
+
+  @ApiProperty()
+  @Column()
+  @Index('researchesUserIdIdx')
+  createdByUserId: string;
 
   @ApiProperty({ description: 'Research creation timestamp' })
   @CreateDateColumn({

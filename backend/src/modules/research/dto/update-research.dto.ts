@@ -1,20 +1,20 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ResearchStatus } from '../entities/research.status';
 import { IsEnum, IsOptional } from 'class-validator';
 
 export class UpdateResearchDto {
-  @ApiProperty({ description: 'Research name', example: 'Research' })
+  @ApiPropertyOptional({ description: 'Research name', example: 'Research' })
   @IsOptional()
   public name?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Description',
     example: 'Some research description',
   })
   @IsOptional()
   public description?: string;
 
-  @ApiProperty({ description: 'Research status', example: 'created' })
+  @ApiPropertyOptional({ description: 'Research status', example: 'created' })
   @IsOptional()
   @IsEnum(ResearchStatus)
   public status?: ResearchStatus;

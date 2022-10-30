@@ -11,6 +11,7 @@ import {
   Patch,
   Post,
   Query,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ResearchService } from './research.service';
@@ -24,6 +25,7 @@ import { PageDto } from '../../core/dto/find_all/page.dto';
 import { FindAllOptionsDto } from '../../core/dto/find_all/find_all_options.dto';
 import { ApiPaginatedResponse } from '../../core/api_docs/api_paginated_response';
 import { isQueryFailedError, PostgresErrorCode } from '../../core/db/db_errors';
+import { User } from '../user/entities/user.entity';
 
 @Controller('researches')
 @ApiTags('Researches')
@@ -55,8 +57,11 @@ export class ResearchController {
 
   @Post()
   @UseGuards(RoleGuard([UserRole.ADMIN]))
-  create(@Body() dto: CreateResearchDto): Promise<void> {
-    return this.handleResearchUniqueError(() => this.service.create(dto));
+  create(@Request() request, @Body() dto: CreateResearchDto): Promise<void> {
+    const user: User = request.user;
+    return this.handleResearchUniqueError(() =>
+      this.service.create(user.id, dto),
+    );
   }
 
   @Patch(':id')

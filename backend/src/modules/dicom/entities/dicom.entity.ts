@@ -14,6 +14,7 @@ import { DicomType } from './dicom.type';
 import { Research } from '../../research/entities/research.entity';
 import { IsOptional } from 'class-validator';
 import { DicomMarkup } from './dicom-markup';
+import { DicomStatus } from './dicom.status';
 
 @Entity({ name: 'dicoms' })
 @Index(
@@ -65,6 +66,15 @@ export class Dicom {
   @Column({ type: 'json', nullable: true })
   @IsOptional()
   public markup?: DicomMarkup;
+
+  @ApiProperty({ description: 'DICOM file status', example: 'in_markup' })
+  @Column({
+    name: 'status',
+    type: 'enum',
+    enum: DicomStatus,
+    default: DicomStatus.NOT_MARKED,
+  })
+  public status: DicomStatus;
 
   @ApiProperty({ description: 'Research creation timestamp' })
   @CreateDateColumn({

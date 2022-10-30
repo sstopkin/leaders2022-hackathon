@@ -11,6 +11,7 @@ import {
 } from 'class-validator';
 import { DicomType } from '../entities/dicom.type';
 import { DicomMarkup } from '../entities/dicom-markup';
+import { DicomStatus } from '../entities/dicom.status';
 
 export class GetDicomDto {
   @ApiProperty()
@@ -56,6 +57,11 @@ export class GetDicomDto {
   @ApiProperty()
   @IsOptional()
   public markup?: DicomMarkup;
+
+  @ApiProperty({ description: 'DICOM file status', example: 'in_markup' })
+  @IsNotEmpty()
+  @IsEnum(DicomStatus)
+  public status: DicomStatus;
 
   @ApiProperty()
   @IsDate()

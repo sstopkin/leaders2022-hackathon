@@ -10,9 +10,16 @@ import { makeFindAllQuryBuilder } from '../../core/db/query_builders/find_all';
 import { GetDicomDto } from './dto/get-dicom.dto';
 import { FindAllDicomDto } from './dto/find-all-dicom.dto';
 import { ResearchService } from '../research/research.service';
+import { DicomStatus } from './entities/dicom.status';
 
 @Injectable()
 export class DicomService {
+  private readonly availableStatusChanges: Array<string> = [
+    `${DicomStatus.NOT_MARKED}-${DicomStatus.IN_MARKUP}`,
+    `${DicomStatus.IN_MARKUP}-${DicomStatus.MARKUP_DONE}`,
+    `${DicomStatus.MARKUP_DONE}-${DicomStatus.IN_MARKUP}`,
+  ];
+
   constructor(
     @InjectRepository(Dicom)
     private readonly dicomRepository: Repository<Dicom>,
@@ -88,6 +95,8 @@ export class DicomService {
     dicom.description = createDicomDto.description;
     dicom.dicomType = createDicomDto.dicomType;
     dicom.research = research;
+    dicom.status = DicomStatus.NOT_MARKED;
+    dicom.markup = null;
     const savedDicom = await this.dicomRepository.save(dicom);
 
     return await this.makeGetDicomDto(savedDicom);
@@ -107,6 +116,10 @@ export class DicomService {
     }
     if (!!updateDicomDto.markup) {
       dicom.markup = updateDicomDto.markup;
+    }
+    if (!!updateDicomDto.status) {
+      this.validateStatusChanging(dicom.status, updateDicomDto.status);
+      dicom.status = updateDicomDto.status;
     }
     const updatedDicom = await this.dicomRepository.save(dicom);
 
@@ -137,6 +150,7 @@ export class DicomService {
       );
     }
     dicomDto.markup = dicom.markup;
+    dicomDto.status = dicom.status;
     dicomDto.createdAt = dicom.createdAt;
     dicomDto.updatedAt = dicom.updatedAt;
     dicomDto.deletedAt = dicom.deletedAt;
@@ -157,5 +171,15 @@ export class DicomService {
       path,
       S3PresignedUrlOperation.GET_OBJECT,
     );
+  }
+
+  validateStatusChanging(currentStatus: DicomStatus, newStatus: DicomStatus) {
+    if (
+      !this.availableStatusChanges.includes(`${currentStatus}-${newStatus}`)
+    ) {
+      throw new BadRequestException(
+        `Not valid operation of changing status '${currentStatus}' on '${newStatus}'`,
+      );
+    }
   }
 }
