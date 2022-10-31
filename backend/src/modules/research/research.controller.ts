@@ -56,7 +56,7 @@ export class ResearchController {
   }
 
   @Post()
-  @UseGuards(RoleGuard([UserRole.ADMIN]))
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
   create(@Request() request, @Body() dto: CreateResearchDto): Promise<void> {
     const user: User = request.user;
     return this.handleResearchUniqueError(() =>
@@ -74,7 +74,7 @@ export class ResearchController {
   }
 
   @Delete(':id')
-  @UseGuards(RoleGuard([UserRole.ADMIN]))
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
   delete(@Param('id') id: string): Promise<void> {
     return this.service.softDelete(id);
   }
