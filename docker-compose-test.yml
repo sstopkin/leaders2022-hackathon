@@ -55,7 +55,7 @@ services:
         ENV: test
     hostname: generator
     container_name: generator
-    env_file: ./ops-tools/environments/test/.env
+    env_file: generator/ops-tools/environments/test/.env
     networks:
       - demo_network
     logging:
