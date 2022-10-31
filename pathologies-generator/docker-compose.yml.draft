@@ -1,0 +1,17 @@
+version: '3.7'
+
+networks:
+  network:
+    name: "hackathon-leaders2022-network"
+
+services:
+  backend:
+    build:
+      context: ./
+      args:
+        ENV: ${ENV}
+    hostname: pathologies-generator
+    container_name: pathologies-generator
+    env_file: ./ops-tools/environments/${ENV}/.env
+    networks:
+      - network
