@@ -31,7 +31,7 @@ export interface IResearch {
 export interface IDicom {
     id: string;
     researchId: string;
-    fileName: string;
-    size: number;
+    name: string;
+    createdAt: string;
     isUploaded: boolean;
 }

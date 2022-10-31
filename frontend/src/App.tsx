@@ -11,7 +11,7 @@ import dataProvider from "@pankod/refine-nestjsx-crud";
 import {authProvider} from "./authProvider";
 import {UsersList, UsersCreate, UsersEdit, UsersShow} from "pages/users";
 import {ResearchesCreate, ResearchesEdit, ResearchesList, ResearchesShow} from "./pages/researches";
-import { DicomsCreate, DicomsShow } from "pages/dicom";
+import {DicomsCreate, DicomsShow} from "pages/dicom";
 import {
     Title,
     Header,
@@ -22,30 +22,8 @@ import {
 } from "components/layout";
 import {useTranslation} from "react-i18next";
 import {Login} from "pages/login";
-import axios, {AxiosRequestConfig} from "axios";
 import * as constants from "./constants";
-
-const axiosInstance: any = axios.create();
-
-axiosInstance.interceptors.request.use(
-    // Here we can perform any function we'd like on the request
-    (request: AxiosRequestConfig) => {
-        // Retrieve the token from local storage
-        const token = localStorage.getItem(constants.ACCESS_TOKEN_KEY);
-        // Check if the header property exists
-        if (request.headers) {
-            // Set the Authorization header if it exists
-            request.headers["Authorization"] = `Bearer ${token}`;
-        } else {
-            // Create the headers property if it does not exist
-            request.headers = {
-                Authorization: `Bearer ${token}`,
-            };
-        }
-
-        return request;
-    }
-);
+import axiosInstance from "./setup";
 
 function App() {
     const {t, i18n} = useTranslation();
@@ -66,11 +44,11 @@ function App() {
                 ...routerProvider,
                 routes: [
                     {
-                        element: <Authenticated><DicomsCreate /></Authenticated>,
+                        element: <Authenticated><DicomsCreate/></Authenticated>,
                         path: "/dicom/create",
                         layout: true,
                     }, {
-                        element: <Authenticated><DicomsShow /></Authenticated>,
+                        element: <Authenticated><DicomsShow/></Authenticated>,
                         path: "/dicom/show",
                         layout: true,
                     },
@@ -102,20 +80,20 @@ function App() {
             // DashboardPage={DashboardPage}
             resources={[
                 {
-                    name: "users",
-                    icon: <Icons.UserOutlined/>,
-                    list: UsersList,
-                    create: UsersCreate,
-                    edit: UsersEdit,
-                    show: UsersShow,
-                },
-                {
                     name: 'researches',
                     icon: <Icons.SnippetsOutlined/>,
                     list: ResearchesList,
                     show: ResearchesShow,
                     create: ResearchesCreate,
                     edit: ResearchesEdit
+                },
+                {
+                    name: "users",
+                    icon: <Icons.UserOutlined/>,
+                    list: UsersList,
+                    create: UsersCreate,
+                    edit: UsersEdit,
+                    show: UsersShow,
                 },
             ]}
             Title={Title}
