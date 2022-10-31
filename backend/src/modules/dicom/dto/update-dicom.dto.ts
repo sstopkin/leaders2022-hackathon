@@ -6,7 +6,6 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { DicomMarkup } from '../entities/dicom-markup';
 import { DicomStatus } from '../entities/dicom.status';
 
 export class UpdateDicomDto {
@@ -26,7 +25,7 @@ export class UpdateDicomDto {
   @ApiPropertyOptional({ description: 'DICOM file markup' })
   @IsOptional()
   @ValidateNested({ each: true })
-  public markup?: DicomMarkup;
+  public markup?: any;
 
   @ApiPropertyOptional({
     description: 'DICOM file status',

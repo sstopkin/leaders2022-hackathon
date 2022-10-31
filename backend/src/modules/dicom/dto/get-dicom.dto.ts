@@ -10,7 +10,6 @@ import {
   IsUUID,
 } from 'class-validator';
 import { DicomType } from '../entities/dicom.type';
-import { DicomMarkup } from '../entities/dicom-markup';
 import { DicomStatus } from '../entities/dicom.status';
 
 export class GetDicomDto {
@@ -56,7 +55,7 @@ export class GetDicomDto {
 
   @ApiProperty()
   @IsOptional()
-  public markup?: DicomMarkup;
+  public markup?: any;
 
   @ApiProperty({ description: 'DICOM file status', example: 'in_markup' })
   @IsNotEmpty()
