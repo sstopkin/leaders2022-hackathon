@@ -13,7 +13,6 @@ import {
 import { DicomType } from './dicom.type';
 import { Research } from '../../research/entities/research.entity';
 import { IsOptional } from 'class-validator';
-import { DicomMarkup } from './dicom-markup';
 import { DicomStatus } from './dicom.status';
 
 @Entity({ name: 'dicoms' })
@@ -65,7 +64,7 @@ export class Dicom {
 
   @Column({ type: 'json', nullable: true })
   @IsOptional()
-  public markup?: DicomMarkup;
+  public markup?: any;
 
   @ApiProperty({ description: 'DICOM file status', example: 'in_markup' })
   @Column({
