@@ -4,4 +4,6 @@ export enum ResearchStatus {
   UPLOADED = 'uploaded',
   GENERATING = 'generating',
   GENERATED = 'generated',
+  IN_MARKUP = 'in_markup',
+  MARKUP_DONE = 'markup_done',
 }
