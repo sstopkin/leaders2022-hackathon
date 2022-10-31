@@ -37,7 +37,7 @@ export class ResearchController {
 
   @Get()
   @ApiPaginatedResponse(Research)
-  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER], true))
   findAll(
     @Query() options: FindAllOptionsDto,
   ): Promise<Research[] | PageDto<Research>> {

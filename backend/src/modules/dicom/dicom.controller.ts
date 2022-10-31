@@ -29,7 +29,7 @@ export class DicomController {
 
   @Get()
   @ApiPaginatedResponse(Research)
-  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER], true))
   findAll(@Query() options: FindAllDicomDto) {
     return this.dicomService.findAll(options);
   }
