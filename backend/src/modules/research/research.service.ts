@@ -18,6 +18,12 @@ export class ResearchService {
     `${ResearchStatus.UPLOADING}-${ResearchStatus.UPLOADED}`,
     `${ResearchStatus.UPLOADED}-${ResearchStatus.GENERATING}`,
     `${ResearchStatus.GENERATING}-${ResearchStatus.GENERATED}`,
+
+    `${ResearchStatus.UPLOADED}-${ResearchStatus.IN_MARKUP}`,
+    `${ResearchStatus.GENERATING}-${ResearchStatus.IN_MARKUP}`,
+    `${ResearchStatus.GENERATED}-${ResearchStatus.IN_MARKUP}`,
+    `${ResearchStatus.IN_MARKUP}-${ResearchStatus.MARKUP_DONE}`,
+    `${ResearchStatus.MARKUP_DONE}-${ResearchStatus.IN_MARKUP}`,
   ];
 
   public constructor(
