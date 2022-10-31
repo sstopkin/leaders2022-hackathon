@@ -52,7 +52,7 @@ services:
     build:
       context: generator
       args:
-        ENV: ${ENV}
+        ENV: test
     hostname: generator
     container_name: generator
     env_file: ./ops-tools/environments/test/.env
