@@ -85,7 +85,8 @@
       "status": "Статус",
       "createdAt": "Создан",
       "updatedAt": "Обновлен",
-      "size": "Размер"
+      "size": "Размер",
+      "createdBy": "Создан"
     },
     "titles": {
       "create": "Новое исследование",

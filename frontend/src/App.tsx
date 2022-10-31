@@ -36,6 +36,7 @@ function App() {
 
     return (
         <Refine
+            disableTelemetry
             notificationProvider={notificationProvider}
             ReadyPage={ReadyPage}
             catchAll={<ErrorComponent/>}

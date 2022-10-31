@@ -2,12 +2,11 @@
 import {
     useTranslate,
     IResourceComponentsProps,
-    useOne,
     useShow,
-    useUpdate,
     useCustom,
     usePermissions,
     useNavigation,
+    useOne,
 } from "@pankod/refine-core";
 import {
     Show,
@@ -17,11 +16,11 @@ import {
     Button,
     Icons,
     Space,
-    ShowButton,
     BooleanField,
     DateField,
     Row,
     Col,
+    DeleteButton,
 } from "@pankod/refine-antd";
 
 import {IDicom, IResearch, IUser} from "interfaces";
@@ -29,7 +28,6 @@ import {API_ROOT, DATE_FORMAT} from "../../constants";
 import FileOutlined from "@ant-design/icons/lib/icons/FileOutlined";
 import React from "react";
 import {Roles} from "interfaces/roles";
-import {FileMarkdownOutlined} from "@ant-design/icons";
 
 const {Title} = Typography;
 
@@ -43,12 +41,10 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
     const {data, isLoading} = queryResult;
     const record = data?.data;
 
-    const {mutate} = useUpdate();
-
-    // const { data: createdByInfo } = useOne<IUser>({
-    //   resource: "users",
-    //   id: (record?.userId as any) ?? "",
-    // });
+    const { data: createdByInfo } = useOne<IUser>({
+      resource: "users",
+      id: (record?.createdByUserId as any) ?? "",
+    });
 
     const {data: projectDicoms} = useCustom<Array<IDicom>>({
         url: `${API_ROOT}/dicoms`,
@@ -79,22 +75,15 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                         <Title level={5}>{t("researches.fields.id")}</Title>
                         <Typography.Text>{record?.id}</Typography.Text>
 
-                        {/* <Title level={5}>{t("researches.fields.createdBy")}</Title>
-            <Typography.Text>
-              {createdByInfo?.data.firstName} {createdByInfo?.data.lastName}
-            </Typography.Text> */}
+                        <Title level={5}>{t("researches.fields.createdBy")}</Title>
+                        <Typography.Text>
+                            {createdByInfo?.data.firstName} {createdByInfo?.data.lastName}
+                        </Typography.Text>
 
                         <Title level={5}>{t("researches.fields.description")}</Title>
                         <Typography.Text>
                             <MarkdownField value={record?.description}/>
                         </Typography.Text>
-
-                        {/* <ShowButton
-                        onClick={() => handleShowDicomViewerModal(record)}
-                        hideText
-                        size="small"
-                        recordItemId={'asd'}
-                      /> */}
                     </Col>
                     <Col xl={19} xs={24}>
                         <Title level={5}>{t("researches.fields.files")}</Title>
@@ -142,14 +131,19 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                                 dataIndex="actions"
                                 render={(_, record) => (
                                     <Space>
-                                        {/* {record.isUploaded && (
-                      <ShowButton
-                        onClick={() => handleShowDicomViewerModal(record)}
-                        hideText
-                        size="small"
-                        recordItemId={record.id}
-                      />
-                    )} */}
+                                        {permissionsData?.includes(Roles.ADMIN) && (
+                                            <DeleteButton hideText size="small" resourceName="dicoms" recordItemId={record.id} />
+                                        )}
+                                        {record.isUploaded && (
+                                            <a
+                                                href={record.downloadingUrl}
+                                                download={record.id}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                <Button size="small" icon={<FileOutlined />} />
+                                            </a>
+                                        )}
                                     </Space>
                                 )}
                             />

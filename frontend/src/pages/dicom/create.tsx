@@ -25,10 +25,9 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
     const onSubmitClick = async () => {
         setLoading(true);
         const researchId = form.getFieldValue('researchId');
-        const fileName = form.getFieldValue('name');
         const file: Array<RcFile> = form.getFieldValue('file');
 
-        if (!researchId || !fileName || !file) {
+        if (!researchId || !file) {
             notifications.open?.({
                 type: 'error',
                 message: 'Ошибка создания файла',
@@ -37,7 +36,7 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
         } else {
             try {
                 const createResponse = await axiosInstance.post(`${API_ROOT}/dicoms`, {
-                    name: fileName,
+                    name: file[0].name,
                     researchId,
                     dicomType: 'original',
                     description: 'Test description'
@@ -48,15 +47,16 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
                 const uploadingUrl = createResponse.data.uploadingUrl;
 
                 if (uploadingUrl) {
-                    await axios.put(uploadingUrl, file[0]);
+                    let options = {
+                        headers: {
+                          'Content-Type': file[0].type
+                        }
+                      };
+                    await axios.put(uploadingUrl, file[0], options);
 
                     await axiosInstance.patch(`${API_ROOT}/dicoms/${dicomId}`, {
                         "isUploaded": true
                     })
-
-                    await axiosInstance.patch(`${API_ROOT}/researches/${researchId}`, {
-                        "status": "uploaded"
-                    });
 
                     notifications.open?.({
                         type: 'success',
@@ -98,21 +98,6 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
                     <Input disabled/>
                 </Form.Item>
                 <Form.Item
-                    label={t("dicoms.fields.filename")}
-                    name="name"
-                    rules={[
-                        {
-                            required: true,
-                            type: "string",
-                        },
-                        {
-                            min: 5,
-                        },
-                    ]}
-                >
-                    <Input disabled={isLoading}/>
-                </Form.Item>
-                <Form.Item
                     label={t("researches.fields.file")}
                     name="file"
                     valuePropName="fileList"
@@ -124,7 +109,7 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
                         },
                     ]}
                 >
-                    <Upload disabled={isLoading} beforeUpload={() => false} name="file" accept=".dcm" maxCount={1}>
+                    <Upload disabled={isLoading} beforeUpload={() => false} name="file" accept=".dcm,.dicom" maxCount={1}>
                         <Button icon={<Icons.UploadOutlined/>}>Загрузить файл</Button>
                     </Upload>
                 </Form.Item>
