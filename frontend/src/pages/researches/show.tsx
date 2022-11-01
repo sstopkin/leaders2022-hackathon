@@ -65,7 +65,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                 canEdit={permissionsData?.includes(Roles.ADMIN)}
                 headerButtons={() => <Button type="primary" onClick={
                     () => navigate.push(`/dicom/create?researchId=${record?.id}`)
-                } icon={<Icons.UploadOutlined/>}>Загрузить файл</Button>}
+                } icon={<Icons.PlusOutlined/>}>Добавить файл</Button>}
             >
                 <Row gutter={[16, 16]}>
                     <Col xl={5} lg={24} xs={24}>
@@ -129,8 +129,9 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                             <Table.Column<IDicom>
                                 title={t("table.actions")}
                                 dataIndex="actions"
-                                render={(_, record) => (
-                                    <Space>
+                                render={(_, record) => {
+                                    console.log(record)
+                                    return <Space>
                                         {permissionsData?.includes(Roles.ADMIN) && (
                                             <DeleteButton hideText size="small" resourceName="dicoms" recordItemId={record.id} />
                                         )}
@@ -145,7 +146,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                                             </a>
                                         )}
                                     </Space>
-                                )}
+                                }}
                             />
                         </Table>
                     </Col>
