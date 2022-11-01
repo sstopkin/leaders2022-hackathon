@@ -96,6 +96,7 @@ export class DicomService {
     dicom.dicomType = createDicomDto.dicomType;
     dicom.research = research;
     dicom.status = DicomStatus.NOT_MARKED;
+    dicom.isUploaded = false;
     dicom.markup = null;
     const savedDicom = await this.dicomRepository.save(dicom);
 

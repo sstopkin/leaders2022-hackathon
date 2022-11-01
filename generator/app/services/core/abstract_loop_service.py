@@ -16,7 +16,7 @@ class AbstractLoopService:
                 logger.debug(f"Running a new step of {self.__class__.__name__}")
                 self.run_step()
             except Exception as ex:
-                logger.error(f"Error during execution {self.__class__.__name__} step: ", str(ex))
+                logger.error(f"Error during execution {self.__class__.__name__} step: {ex}")
             finally:
                 delay = self._define_delay(current_step_start_time, self._period)
                 logger.debug(f"Awaiting for a new step of {self.__class__.__name__}")
