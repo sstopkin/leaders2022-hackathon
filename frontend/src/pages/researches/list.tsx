@@ -37,7 +37,7 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
 
     return (
         <List headerButtons={({defaultButtons}) => <><Button
-            onClick={() => navigate.push("/researches/generate/")}
+            onClick={() => navigate.push("/researches/generate")}
             type="default"
             icon={
                 <Icons.PlusSquareOutlined />}>

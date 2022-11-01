@@ -3,7 +3,7 @@ import {
     IResourceComponentsProps,
     useNavigation,
 } from "@pankod/refine-core";
-import { Button, Create, Form, Icons, Input, Select, Show, useForm, useSelect } from "@pankod/refine-antd";
+import { Button, Create, Form, Icons, Input, Select, useForm, useSelect } from "@pankod/refine-antd";
 import { IResearch } from "interfaces";
 import ReactMde from "react-mde";
 import ReactMarkdown from "react-markdown";
@@ -23,7 +23,7 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
     });
 
     return (
-        <Create resource="researches" saveButtonProps={saveButtonProps} title={<div style={{display: 'flex', alignItems: 'center'}} >
+        <Create saveButtonProps={saveButtonProps} title={<div style={{display: 'flex', alignItems: 'center'}} >
             <Button style={{marginRight: '8px'}} onClick={navigation.goBack} type="text" icon={<Icons.ArrowLeftOutlined/>}/><span>Генерация исследования</span></div>}>
             <Form {...formProps} layout="vertical">
                 <Form.Item
