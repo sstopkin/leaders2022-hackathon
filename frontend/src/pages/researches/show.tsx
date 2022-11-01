@@ -41,12 +41,12 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
     const {data, isLoading} = queryResult;
     const record = data?.data;
 
-    const { data: createdByInfo } = useOne<IUser>({
-      resource: "users",
-      id: (record?.createdByUserId as any) ?? "",
+    const {data: createdByInfo} = useOne<IUser>({
+        resource: "users",
+        id: (record?.createdByUserId as any) ?? "",
     });
 
-    const {data: projectDicoms} = useCustom<Array<IDicom>>({
+    const {data: projectDicoms, refetch} = useCustom<Array<IDicom>>({
         url: `${API_ROOT}/dicoms`,
         method: "get",
         config: {
@@ -129,24 +129,30 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                             <Table.Column<IDicom>
                                 title={t("table.actions")}
                                 dataIndex="actions"
-                                render={(_, record) => {
-                                    console.log(record)
-                                    return <Space>
-                                        {permissionsData?.includes(Roles.ADMIN) && (
-                                            <DeleteButton hideText size="small" resourceName="dicoms" recordItemId={record.id} />
-                                        )}
-                                        {record.isUploaded && (
+                                render={(_, record) => <Space>
+                                    {record.isUploaded && (
+                                        <>
+                                            <Button onClick={() => navigate.push(`/dicom/show/${record.id}`)}
+                                                    size="small" icon={<Icons.EyeOutlined/>}/>
                                             <a
                                                 href={record.downloadingUrl}
                                                 download={record.id}
                                                 target="_blank"
                                                 rel="noreferrer"
                                             >
-                                                <Button size="small" icon={<FileOutlined />} />
+                                                <Button size="small" icon={<FileOutlined/>}/>
                                             </a>
-                                        )}
-                                    </Space>
-                                }}
+                                        </>
+                                    )}
+                                    {permissionsData?.includes(Roles.ADMIN) && (
+                                        <DeleteButton
+                                            onSuccess={() => refetch()}
+                                            hideText size="small"
+                                            resourceNameOrRouteName="dicoms"
+                                            recordItemId={record.id}/>
+                                    )}
+                                </Space>
+                                }
                             />
                         </Table>
                     </Col>
