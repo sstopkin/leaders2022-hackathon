@@ -174,7 +174,7 @@
       "title": "Аннотации",
       "tool": {
         "Length": "Линейка",
-        "RectangleROI": "Прямоугольная область",
+        "RectangleROI": "Прямоуг. область",
         "EllipticalROI": "Круглая область",
         "Bidirectional": "Двунаправл. линейка",
         "Angle": "Угол",

@@ -12,7 +12,7 @@ import dataProvider from "@pankod/refine-nestjsx-crud";
 import {authProvider} from "./authProvider";
 import {UsersList, UsersCreate, UsersEdit, UsersShow} from "pages/users";
 import {ResearchesCreate, ResearchesGenerate, ResearchesEdit, ResearchesList, ResearchesShow} from "./pages/researches";
-import {DicomsCreate, DicomsShow} from "pages/dicom";
+import {DicomsCreate, DicomsShow, DicomsList} from "pages/dicom";
 import {
     Title,
     Header,
@@ -56,15 +56,21 @@ function App() {
                         element: <Authenticated><DicomsCreate/></Authenticated>,
                         path: "/dicom/create",
                         layout: true,
-                    }, {
+                    },
+                    {
+                        element: <Authenticated><DicomsList/></Authenticated>,
+                        path: "/dicom/show",
+                        layout: true
+                    },
+                    {
                         element: <Authenticated><DicomsShow/></Authenticated>,
                         path: "/dicom/show/:id",
                         layout: true,
                     }, {
-                    element: <Authenticated><ResearchesGenerate/></Authenticated>,
-                    path: "/researches/generate",
-                    layout: true,
-                },                    
+                        element: <Authenticated><ResearchesGenerate/></Authenticated>,
+                        path: "/researches/generate",
+                        layout: true,
+                    },
                 ],
             }}
             dataProvider={dataProvider(`${constants.API_ROOT}`, axiosInstance)}
