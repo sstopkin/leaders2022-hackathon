@@ -10,7 +10,7 @@ import routerProvider from "@pankod/refine-react-router-v6";
 import dataProvider from "@pankod/refine-nestjsx-crud";
 import {authProvider} from "./authProvider";
 import {UsersList, UsersCreate, UsersEdit, UsersShow} from "pages/users";
-import {ResearchesCreate, ResearchesEdit, ResearchesList, ResearchesShow} from "./pages/researches";
+import {ResearchesCreate, ResearchesGenerate, ResearchesEdit, ResearchesList, ResearchesShow} from "./pages/researches";
 import {DicomsCreate, DicomsShow} from "pages/dicom";
 import {
     Title,
@@ -52,7 +52,11 @@ function App() {
                         element: <Authenticated><DicomsShow/></Authenticated>,
                         path: "/dicom/show",
                         layout: true,
-                    },
+                    }, {
+                    element: <Authenticated><ResearchesGenerate/></Authenticated>,
+                    path: "/researches/generate",
+                    layout: true,
+                },                    
                 ],
             }}
             dataProvider={dataProvider(`${constants.API_ROOT}`, axiosInstance)}

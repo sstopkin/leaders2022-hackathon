@@ -1,5 +1,3 @@
-type ResearchStatus = 'CREATED' | 'IN_WORK' | 'REVIEW' | 'DONE'
-
 export interface ICategory {
     id: string;
     title: string;

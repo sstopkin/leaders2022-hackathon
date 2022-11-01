@@ -18,10 +18,11 @@ import {
 import {IResearch} from "interfaces";
 import {Roles} from "interfaces/roles";
 import {DATE_FORMAT} from "../../constants";
+import { ResearchProcessingStatus } from "components/researchesStatus";
+
 
 export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
-    const navigate = useNavigation();
 
     const {tableProps} = useTable<IResearch>({
         initialSorter: [
@@ -55,7 +56,9 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                     dataIndex="status"
                     key="status"
                     title={t("researches.fields.status")}
-                    render={(value) => <TagField value={t(`enum.researchStatuses.${value}`)}/>}
+                    render={(value) => {
+                        return <ResearchProcessingStatus status={value} />;
+                    }}
                 />
                 <Table.Column
                     dataIndex="createdAt"
@@ -85,8 +88,8 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                             {permissionsData?.includes(Roles.ADMIN) && (
                                 <DeleteButton hideText size="small" recordItemId={record.id}/>
                             )}
-                            <Button onClick={() => navigate.push(`/dicom/show/${record.id}`)} type="primary"
-                                    size="small">Разметить</Button>
+                            {/* <Button onClick={() => navigate.push(`/dicom/show/${record.id}`)} type="primary"
+                                    size="small">Разметить</Button> */}
                         </Space>
                     )}
                 />
