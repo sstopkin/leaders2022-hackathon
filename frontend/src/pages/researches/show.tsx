@@ -58,7 +58,10 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
         },
     });
 
+
     const files = projectDicoms?.data || [];
+
+    console.log(data);
 
     return (
         <>
@@ -68,6 +71,12 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                 headerButtons={({ defaultButtons }) => (
                     <>
                         {defaultButtons}
+                        <Button
+                            type="primary"
+                            onClick={() => navigate.push(`/dicom/show?researchId=${record?.id}`)}
+                            icon={<Icons.EditOutlined/>}>
+                            Разметить исследование
+                        </Button>
                         <Button type="primary" onClick={() => navigate.push(`/dicom/create?researchId=${record?.id}`)} icon={<Icons.PlusOutlined/>}>Добавить файл</Button>
                     </>
                 )}

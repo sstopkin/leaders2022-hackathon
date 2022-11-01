@@ -31,6 +31,7 @@ const {
     ZoomTool,
     PlanarFreehandROITool,
     ToolGroupManager,
+    StackScrollMouseWheelTool
 } = cornerstoneTools;
 
 const toolGroupId = 'STACK_TOOL_GROUP_1';
@@ -50,6 +51,7 @@ const toolsIcons = {
 }
 
 const toolsNames = [
+    StackScrollMouseWheelTool.toolName,
     LengthTool.toolName,
     RectangleROITool.toolName,
     EllipticalROITool.toolName,
@@ -61,6 +63,7 @@ const toolsNames = [
     ZoomTool.toolName,
 ];
 
+cornerstoneTools.addTool(StackScrollMouseWheelTool)
 cornerstoneTools.addTool(LengthTool)
 cornerstoneTools.addTool(PanTool)
 cornerstoneTools.addTool(WindowLevelTool)
@@ -71,13 +74,17 @@ cornerstoneTools.addTool(BidirectionalTool)
 cornerstoneTools.addTool(AngleTool)
 cornerstoneTools.addTool(PlanarFreehandROITool)
 
-const DicomViewer: React.FC = () => {
+interface DicomViewerProps {
+    dicomFiles: Array<File>
+}
+
+const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
+    console.log(dicomFiles.length);
     const t = useTranslate();
     const notification = useNotification();
 
     const imageZoneRef = React.useRef<null | HTMLDivElement>(null)
     const hiddenImportAnnotationInputRef = React.useRef<null | HTMLInputElement>(null)
-    const hiddenFileInputRef = React.useRef<null | HTMLInputElement>(null)
     const toolGroupRef = React.useRef<IToolGroup | undefined>(undefined)
     const renderingEngineRef = React.useRef<RenderingEngine | null>(null)
     const viewportRef = React.useRef<IStackViewport | null>(null)
@@ -91,12 +98,25 @@ const DicomViewer: React.FC = () => {
         isVisible: boolean
     }>>([]);
 
-    //TODO Remove with upload button
-    const handleUploadClick = () => {
-        if (hiddenFileInputRef.current) {
-            hiddenFileInputRef.current.click();
+    React.useEffect(() => {
+        return () => {
+            ToolGroupManager.destroyToolGroup(toolGroupId);
         }
-    }
+    }, [])
+
+    React.useEffect(() => {
+        const displayDicomFile = async () => {
+            if (dicomFiles && dicomFiles.length > 0) {
+                parseDicomFile(dicomFiles[0]);
+                const imageIds = dicomFiles.map(file => cornerstoneWADOImageLoader.wadouri.fileManager.add(file));
+
+                if (imageZoneRef.current) {
+                    await initializeCornerstone(imageIds, imageZoneRef.current)
+                }
+            }
+        }
+        displayDicomFile()
+    }, [dicomFiles])
 
     const handleImportClick = () => {
         if (hiddenImportAnnotationInputRef.current) {
@@ -274,14 +294,16 @@ const DicomViewer: React.FC = () => {
         reader.readAsArrayBuffer(file);
     }
 
-    const initializeCornerstone = async (imageId: string, element: HTMLDivElement) => {
+    const initializeCornerstone = async (imageIds: Array<string>, element: HTMLDivElement) => {
         toolGroupRef.current = ToolGroupManager.createToolGroup(toolGroupId);
         renderingEngineRef.current = new cornerstone.RenderingEngine(renderingEngineId);
 
         if (toolGroupRef.current) {
             toolsNames.forEach((toolName) => {
                 toolGroupRef.current?.addTool(toolName);
-                toolGroupRef.current?.setToolPassive(toolName);
+                if (toolName !== StackScrollMouseWheelTool.toolName) {
+                    toolGroupRef.current?.setToolPassive(toolName);
+                }
             })
         }
 
@@ -296,29 +318,13 @@ const DicomViewer: React.FC = () => {
         renderingEngineRef.current.enableElement(viewportInput);
 
         viewportRef.current = renderingEngineRef.current.getViewport(viewportId) as IStackViewport;
-        const stack = [imageId];
-
-
-        await viewportRef.current.setStack(stack);
+        await viewportRef.current.setStack(imageIds);
 
         viewportRef.current.render();
 
         viewportRef.current.canvas.oncontextmenu = (event) => event.preventDefault()
 
         setFileLoaded(true);
-    }
-
-    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-
-        if (file) {
-            parseDicomFile(file);
-            const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
-
-            if (imageZoneRef.current) {
-                await initializeCornerstone(imageId, imageZoneRef.current)
-            }
-        }
     }
 
     const handleImportFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -412,37 +418,25 @@ const DicomViewer: React.FC = () => {
                 onMouseUp={handleAnnotationDraw}
                 ref={imageZoneRef} className={styles.imageContainer}/>
             <div className={styles.rightSidePanel}>
-                <input
-                    accept=".dcm"
-                    ref={hiddenFileInputRef}
-                    type="file"
-                    style={{display: 'none'}}
-                    onChange={handleFileChange}
-                />
-                <Button
-                    style={{marginBottom: '32px'}}
-                    size="large"
-                    onClick={handleUploadClick}
-                    icon={<Icons.UploadOutlined/>}
-                />
                 <div>
-                    {toolsNames.map(toolName => <Tooltip placement="left"
-                                                         color="green"
-                                                         title={t(`dicom.annotations.tool.${toolName}`)}>
-                        <Button
-                            style={{
-                                marginBottom: toolName === PlanarFreehandROITool.toolName ? '32px' : '8px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center'
-                            }}
-                            size="large"
-                            disabled={!fileLoaded}
-                            key={toolName}
-                            type={getButtonType(toolName)}
-                            icon={toolsIcons[toolName]}
-                            onClick={() => handleToolButton(toolName)}/>
-                    </Tooltip>)}
+                    {toolsNames.filter(toolName => toolName !== StackScrollMouseWheelTool.toolName).map(toolName =>
+                        <Tooltip placement="left"
+                                 color="green"
+                                 title={t(`dicom.annotations.tool.${toolName}`)}>
+                            <Button
+                                style={{
+                                    marginBottom: toolName === PlanarFreehandROITool.toolName ? '32px' : '8px',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
+                                }}
+                                size="large"
+                                disabled={!fileLoaded}
+                                key={toolName}
+                                type={getButtonType(toolName)}
+                                icon={toolsIcons[toolName]}
+                                onClick={() => handleToolButton(toolName)}/>
+                        </Tooltip>)}
                     <Tooltip
                         placement="left"
                         color="green"
