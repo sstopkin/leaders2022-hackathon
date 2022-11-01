@@ -58,7 +58,7 @@ function App() {
                         layout: true,
                     }, {
                         element: <Authenticated><DicomsShow/></Authenticated>,
-                        path: "/dicom/show",
+                        path: "/dicom/show/:id",
                         layout: true,
                     }, {
                     element: <Authenticated><ResearchesGenerate/></Authenticated>,
