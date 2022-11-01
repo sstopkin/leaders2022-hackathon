@@ -90,7 +90,13 @@ export class DicomService {
       })
       .getOne();
 
-    const dicom = existedDicom ? existedDicom : new Dicom();
+    if (!!existedDicom) {
+      throw new BadRequestException(
+        'There is another DICOM file in the research with this name',
+      );
+    }
+
+    const dicom = new Dicom();
     dicom.name = createDicomDto.name;
     dicom.description = createDicomDto.description;
     dicom.dicomType = createDicomDto.dicomType;
