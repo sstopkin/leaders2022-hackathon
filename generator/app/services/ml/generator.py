@@ -20,11 +20,13 @@ def remove_broken_dicoms(dicoms: list[FileDataset]):
     return normal_dicoms, broken_dicoms
 
 
-def generate_pathologies(original_dicoms_bytes: List[bytes], lung_part: int = 2) -> List[bytes]:
+def generate_pathologies(
+        original_dicoms_bytes: List[bytes],
+        lung_part_list: List[int] = [1, 2, 3, 4, 5]) -> List[bytes]:
     dicoms = dicom_bytes_to_pydicom(dicom_bytes_list=original_dicoms_bytes)
     dicoms, broken_dicoms = remove_broken_dicoms(dicoms)
 
-    new_dicoms = add_disease_to_dicoms(dicoms, lung_part=lung_part)
+    new_dicoms = add_disease_to_dicoms(dicoms, lung_part_list=lung_part_list)
 
     for idx, broken_dcm in broken_dicoms:
         new_dicoms.insert(idx, broken_dcm)

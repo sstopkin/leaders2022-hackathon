@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import List
 
 import cv2 as cv
 import numpy as np
@@ -15,7 +16,7 @@ def get_part_of_lung(image, segmentation, lung_label):
 
     contours, hierarchy = cv.findContours(image=lung_seg_part, mode=cv.RETR_TREE, method=cv.CHAIN_APPROX_NONE)
     x_min, y_min, x_max, y_max = get_bbox_from_contour(contours[0])
-    segmentation_part = segmentation[y_min:y_max, x_min:x_max] == lung_label
+    segmentation_part = segmentation[y_min:y_max, x_min:x_max] > 0
     part_bbox = [x_min, y_min, x_max, y_max]
     return image[y_min:y_max, x_min:x_max], segmentation_part, part_bbox
 
@@ -108,7 +109,7 @@ def damage_image(image, segmentation, lung_segment_id):
     return img_changed
 
 
-def add_disease_to_dicoms(dicoms: list[FileDataset], lung_part: int):
+def add_disease_to_dicoms(dicoms: List[FileDataset], lung_part_list: List[int]):
     model_input = get_dicom_images(dicoms)
 
     model = lungmask.get_model('unet', 'LTRCLobes')
@@ -118,11 +119,15 @@ def add_disease_to_dicoms(dicoms: list[FileDataset], lung_part: int):
 
     for idx in range(len(dicoms)):
         new_dcm = deepcopy(dicoms[idx])
+        img_changed = model_input[idx]
 
-        if lung_part in np.unique(segs[idx]):
-            img_changed = damage_image(model_input[idx], segs[idx], lung_part)
-            new_dcm.PixelData = img_changed.tobytes()
-            new_dcm._pixel_array = img_changed
+        for lung_part in lung_part_list:
+            if lung_part in np.unique(segs[idx]):
+                img_changed = damage_image(img_changed, segs[idx], lung_part)
+
+        new_dcm.PixelData = img_changed.tobytes()
+        new_dcm._pixel_array = img_changed
 
         new_dicoms.append(new_dcm)
+
     return new_dicoms
