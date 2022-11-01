@@ -4,6 +4,7 @@ import cv2 as cv
 import numpy as np
 import torch
 from lungmask import mask as lungmask
+from pydicom.dataset import FileDataset
 
 from services.ml.src.preprocess import get_dicom_images
 
@@ -107,7 +108,7 @@ def damage_image(image, segmentation, lung_segment_id):
     return img_changed
 
 
-def add_disease_to_dicoms(dicoms: list, lung_part: int):
+def add_disease_to_dicoms(dicoms: list[FileDataset], lung_part: int):
     model_input = get_dicom_images(dicoms)
 
     model = lungmask.get_model('unet', 'LTRCLobes')
