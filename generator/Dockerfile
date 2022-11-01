@@ -7,6 +7,10 @@ ARG ENV
 
 COPY requirements.txt .
 
+RUN apt-get update \
+  && apt-get install -y python3-opencv \
+  && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --upgrade pip && pip install -r requirements.txt \
                                              --no-cache-dir \
                                              --extra-index-url https://download.pytorch.org/whl/cpu
