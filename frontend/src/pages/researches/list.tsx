@@ -32,12 +32,14 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
         ],
     });
 
-    console.log(tableProps)
-
     const {data: permissionsData} = usePermissions();
 
     return (
-        <List>
+        <List headerButtons={({defaultButtons}) => <><Button
+            onClick={() => navigate.push("/researches/generate/")}
+            type="primary">
+            Сгенерировать исследование
+        </Button>{defaultButtons}</>}>
             <Table {...tableProps} rowKey="id">
                 <Table.Column
                     dataIndex="id"
@@ -74,13 +76,13 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                     dataIndex="actions"
                     render={(_, record) => (
                         <Space>
-                            <ShowButton hideText size="small" recordItemId={record.id} />
+                            <ShowButton hideText size="small" recordItemId={record.id}/>
                             {(permissionsData?.includes(Roles.ADMIN)) && (
-                              <EditButton
-                                hideText
-                                size="small"
-                                recordItemId={record.id}
-                           />
+                                <EditButton
+                                    hideText
+                                    size="small"
+                                    recordItemId={record.id}
+                                />
                             )}
                             {permissionsData?.includes(Roles.ADMIN) && (
                                 <DeleteButton hideText size="small" recordItemId={record.id}/>

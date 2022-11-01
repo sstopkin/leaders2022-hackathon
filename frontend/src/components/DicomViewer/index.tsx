@@ -16,6 +16,8 @@ import {ReactComponent as RectangleROI} from "../../assets/icons/rectangleROI.sv
 import {ReactComponent as CircleROI} from "../../assets/icons/circleROI.svg";
 import {ReactComponent as PencilIcon} from "../../assets/icons/pencil.svg";
 import {ReactComponent as WindowLevelIcon} from "../../assets/icons/windowLevel.svg";
+import {ReactComponent as BidirectionalToolIcon} from "../../assets/icons/bidirectionalRuler.svg";
+import {ReactComponent as AngleIcon} from "../../assets/icons/angle.svg";
 import styles from "./DicomViewer.module.css";
 
 const {
@@ -39,8 +41,8 @@ const toolsIcons = {
     [LengthTool.toolName]: <RulerIcon/>,
     [RectangleROITool.toolName]: <RectangleROI/>,
     [EllipticalROITool.toolName]: <CircleROI/>,
-    [BidirectionalTool.toolName]: <Icons.QuestionCircleOutlined/>,
-    [AngleTool.toolName]: <Icons.QuestionCircleOutlined/>,
+    [BidirectionalTool.toolName]: <BidirectionalToolIcon/>,
+    [AngleTool.toolName]: <AngleIcon/>,
     [PlanarFreehandROITool.toolName]: <PencilIcon/>,
     [PanTool.toolName]: <Icons.DragOutlined/>,
     [WindowLevelTool.toolName]: <WindowLevelIcon/>,
