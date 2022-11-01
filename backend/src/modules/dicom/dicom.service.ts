@@ -70,8 +70,9 @@ export class DicomService {
     }
   }
 
-  async findOne(id: string): Promise<Dicom> {
-    return await this.findDicomOrThrowException(id);
+  async findOne(id: string): Promise<GetDicomDto> {
+    const dicom = await this.findDicomOrThrowException(id);
+    return await this.makeGetDicomDto(dicom);
   }
 
   async createOrUpdate(createDicomDto: CreateDicomDto): Promise<GetDicomDto> {
@@ -85,9 +86,6 @@ export class DicomService {
       .andWhere('Dicom.name = :dicomName', {
         dicomName: createDicomDto.name,
       })
-      .andWhere('Dicom.dicomType = :dicomType', {
-        dicomType: createDicomDto.dicomType,
-      })
       .getOne();
 
     if (!!existedDicom) {
@@ -99,7 +97,6 @@ export class DicomService {
     const dicom = new Dicom();
     dicom.name = createDicomDto.name;
     dicom.description = createDicomDto.description;
-    dicom.dicomType = createDicomDto.dicomType;
     dicom.research = research;
     dicom.status = DicomStatus.NOT_MARKED;
     dicom.isUploaded = false;
@@ -143,17 +140,16 @@ export class DicomService {
     dicomDto.id = dicom.id;
     dicomDto.name = dicom.name;
     dicomDto.description = dicom.description;
-    dicomDto.dicomType = dicom.dicomType;
     dicomDto.isUploaded = dicom.isUploaded;
     dicomDto.researchId = dicom.researchId;
     if (!dicom.isUploaded) {
       dicomDto.uploadingUrl = await this.cloudService.getS3PresignedUrl(
-        `${dicom.researchId}/${dicom.dicomType}/${dicom.id}/dicom`,
+        `${dicom.researchId}/${dicom.id}/dicom`,
         S3PresignedUrlOperation.PUT_OBJECT,
       );
     } else {
       dicomDto.downloadingUrl = this.cloudService.makePublicUrl(
-        `${dicom.researchId}/${dicom.dicomType}/${dicom.id}/dicom`,
+        `${dicom.researchId}/${dicom.id}/dicom`,
       );
     }
     dicomDto.markup = dicom.markup;

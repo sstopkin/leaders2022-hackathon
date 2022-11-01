@@ -9,7 +9,6 @@ import {
   IsUrl,
   IsUUID,
 } from 'class-validator';
-import { DicomType } from '../entities/dicom.type';
 import { DicomStatus } from '../entities/dicom.status';
 
 export class GetDicomDto {
@@ -27,11 +26,6 @@ export class GetDicomDto {
   @IsOptional()
   @IsString()
   public description: string;
-
-  @ApiProperty({ description: 'DICOM file type', example: 'original' })
-  @IsNotEmpty()
-  @IsEnum(DicomType)
-  public dicomType: DicomType;
 
   @ApiProperty()
   @IsBoolean()
