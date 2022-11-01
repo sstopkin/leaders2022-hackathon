@@ -120,5 +120,57 @@
       "REVIEW": "НА РЕВЬЮ",
       "DONE": "ОБРАБОТАН"
     }
+  },
+  "dicom": {
+    "info": {
+      "title": "Информация",
+      "patientName": "Пациент",
+      "patientID": "ID пациента",
+      "patientBirthdate": "Дата рождения",
+      "patientSex": "Пол",
+      "institutionName": "Учреждение",
+      "studyID": "ID Исследов.",
+      "studyDescription": "Описание исследов.",
+      "seriesDescription": "Описание серии",
+      "seriesDate": "Дата серии",
+      "seriesTime": "Время серии",
+      "instance": "Экземпляр",
+      "series": "Серии"
+    },
+    "annotations": {
+      "title": "Аннотации",
+      "tool": {
+        "Length": "Линейка",
+        "RectangleROI": "Прямоугольная область",
+        "EllipticalROI": "Круглая область",
+        "Bidirectional": "Двунаправл. линейка",
+        "Angle": "Угол",
+        "PlanarFreehandROI": "Свободная область",
+        "Pan": "Переместить",
+        "WindowLevel": "Уровень",
+        "Zoom": "Увеличение/Уменьшение",
+        "Rotate": "Повернуть",
+        "Export": "Экспорт в файл",
+        "Save": "Сохранить",
+        "Hide": "Спрятать",
+        "Show": "Показать",
+        "Delete": "Удалить",
+        "Import": "Импорт"
+      },
+      "notifications": {
+        "export": {
+          "title": "Экспорт разметки успешно завершен",
+          "description": "Экспорт завершен"
+        },
+        "import": {
+          "title": "Импорт разметки успешно завершен",
+          "description": "Импорт завершен"
+        },
+        "save": {
+          "title": "Сохранение разметки успешно завершено",
+          "description": "Сохранение завершено"
+        }
+      }
+    }
   }
 }

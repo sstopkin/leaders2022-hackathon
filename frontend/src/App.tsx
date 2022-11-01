@@ -1,3 +1,4 @@
+import React from "react";
 import {Authenticated, Refine} from "@pankod/refine-core";
 import {
     notificationProvider,
@@ -23,6 +24,7 @@ import {
 import {useTranslation} from "react-i18next";
 import {Login} from "pages/login";
 import * as constants from "./constants";
+import initCornerstone from "./utils";
 import axiosInstance from "./setup";
 
 function App() {
@@ -34,13 +36,19 @@ function App() {
         getLocale: () => i18n.language,
     };
 
+    React.useEffect(() => {
+        initCornerstone();
+    }, [])
+
     return (
         <Refine
-            disableTelemetry
+            options={{
+                disableTelemetry: true,
+                warnWhenUnsavedChanges: true
+            }}
             notificationProvider={notificationProvider}
             ReadyPage={ReadyPage}
             catchAll={<ErrorComponent/>}
-            warnWhenUnsavedChanges
             routerProvider={{
                 ...routerProvider,
                 routes: [
