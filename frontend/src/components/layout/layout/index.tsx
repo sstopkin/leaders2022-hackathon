@@ -20,7 +20,6 @@ export const Layout: React.FC<LayoutProps> = ({
                     <div
                         style={{
                             padding: breakpoint.sm ? 24 : 12,
-                            minHeight: '100%',
                             height: '100%'
                         }}
                     >
