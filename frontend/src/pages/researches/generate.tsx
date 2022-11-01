@@ -1,8 +1,9 @@
 import {
     useTranslate,
     IResourceComponentsProps,
+    useNavigation,
 } from "@pankod/refine-core";
-import { Create, Form, Input, Select, useForm, useSelect } from "@pankod/refine-antd";
+import { Button, Create, Form, Icons, Input, Select, useForm, useSelect } from "@pankod/refine-antd";
 import { IResearch } from "interfaces";
 import ReactMde from "react-mde";
 import ReactMarkdown from "react-markdown";
@@ -11,6 +12,7 @@ import { useState } from "react";
 export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
     const [selectedTab, setSelectedTab] = useState<"write" | "preview">("write");
     const t = useTranslate();
+    const navigation = useNavigation();
 
     const { formProps, saveButtonProps } = useForm<IResearch>();
 
@@ -21,7 +23,11 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
     });
 
     return (
-        <Create saveButtonProps={saveButtonProps}>
+        <Create title={<div style={{display: 'flex', alignItems: 'center'}}><Button style={{marginRight: '8px'}}
+        onClick={navigation.goBack} type="text"
+        icon={
+            <Icons.ArrowLeftOutlined/>}/><span>Генерация исследования</span></div>}
+saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">
                 <Form.Item
                     label={t("researches.fields.name")}
@@ -59,33 +65,34 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
                     ]}
                 >
                     <Select
+                        mode="multiple"
                         options={[
                             {
-                                label: t("researches.fields.segments.down_right"),
-                                value: "down_right",
+                                label: t("researches.fields.segments.rightUp"),
+                                value: "rightUp",
                             },
                             {
-                                label: t("researches.fields.segments.middle_right"),
-                                value: "middle_right",
+                                label: t("researches.fields.segments.rightMiddle"),
+                                value: "rightMiddle",
                             },
                             {
-                                label: t("researches.fields.segments.up_right"),
-                                value: "up_right",
+                                label: t("researches.fields.segments.rightDown"),
+                                value: "rightDown",
                             },
                             {
-                                label: t("researches.fields.segments.down_left"),
-                                value: "down_left",
+                                label: t("researches.fields.segments.leftUp"),
+                                value: "leftUp",
                             },
                             {
-                                label: t("researches.fields.segments.up_left"),
-                                value: "up_left",
+                                label: t("researches.fields.segments.leftDown"),
+                                value: "leftDown",
                             }
                         ]}
                     />
                 </Form.Item>
                 <Form.Item
                     label={t("researches.fields.pathology")}
-                    name="segment"
+                    name="pathologies"
                     rules={[
                         {
                             required: true,
@@ -95,23 +102,23 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
                     <Select
                         options={[
                             {
-                                label: t("researches.fields.pathology.covid19"),
+                                label: t("researches.fields.pathologies.covid19"),
                                 value: "covid19",
                             },
                             {
-                                label: t("researches.fields.pathology.cancer"),
+                                label: t("researches.fields.pathologies.cancer"),
                                 value: "cancer",
                             },
                             {
-                                label: t("researches.fields.pathology.metastasis"),
+                                label: t("researches.fields.pathologies.metastasis"),
                                 value: "metastasis",
                             }
                         ]}
                     />
                 </Form.Item>
                 <Form.Item
-                    label={t("researches.fields.diseases_count")}
-                    name="diseases_count"
+                    label={t("researches.fields.diseasesCount")}
+                    name="diseasesCount"
                     rules={[
                         {
                             required: true,
@@ -121,23 +128,23 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
                     <Select
                         options={[
                             {
-                                label: t("researches.fields.pathology.small"),
+                                label: t("researches.fields.diseases.single"),
+                                value: "single",
+                            },
+                            {
+                                label: t("researches.fields.diseases.small"),
                                 value: "small",
                             },
                             {
-                                label: t("researches.fields.pathology.medium"),
-                                value: "medium",
-                            },
-                            {
-                                label: t("researches.fields.pathology.high"),
+                                label: t("researches.fields.diseases.high"),
                                 value: "high",
                             }
                         ]}
                     />
                 </Form.Item>
                 <Form.Item
-                    label={t("researches.fields.disease_size")}
-                    name="disease_size"
+                    label={t("researches.fields.diseaseSize")}
+                    name="diseaseSize"
                     rules={[
                         {
                             required: true,
@@ -147,19 +154,19 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
                     <Select
                         options={[
                             {
-                                label: t("researches.fields.pathology.extraSmall"),
+                                label: t("researches.fields.diseasesSize.extraSmall"),
+                                value: "extraSmall",
+                            },
+                            {
+                                label: t("researches.fields.diseasesSize.small"),
                                 value: "small",
                             },
                             {
-                                label: t("researches.fields.pathology.small"),
-                                value: "high",
-                            },
-                            {
-                                label: t("researches.fields.pathology.medium"),
+                                label: t("researches.fields.diseasesSize.medium"),
                                 value: "medium",
                             },
                             {
-                                label: t("researches.fields.pathology.high"),
+                                label: t("researches.fields.diseasesSize.high"),
                                 value: "high",
                             }
                         ]}

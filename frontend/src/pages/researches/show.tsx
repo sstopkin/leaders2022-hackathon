@@ -21,6 +21,7 @@ import {
     Row,
     Col,
     DeleteButton,
+    UrlField,
 } from "@pankod/refine-antd";
 
 import {IDicom, IResearch, IUser} from "interfaces";
@@ -88,6 +89,14 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                             {createdByInfo?.data.firstName} {createdByInfo?.data.lastName}
                         </Typography.Text>
 
+                        {(record?.parentResearchId) && (
+                        <>
+                            <Title level={5}>{t("researches.fields.createdBy")}</Title>
+                            <Typography.Text>
+                                <UrlField value={record?.parentResearchId} />
+                            </Typography.Text>
+                        </>
+                        )}
                         <Title level={5}>{t("researches.fields.description")}</Title>
                         <Typography.Text>
                             <MarkdownField value={record?.description}/>

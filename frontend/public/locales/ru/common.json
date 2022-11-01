@@ -86,7 +86,40 @@
       "createdAt": "Создан",
       "updatedAt": "Обновлен",
       "size": "Размер",
-      "createdBy": "Создан"
+      "createdBy": "Создан",
+      "parentResearch": "Исходное исследование",
+      "researchType": "Тип исследования",
+      "researchTypes": {
+        "generated": "Сгенерировано",
+        "original": "Исходное"
+      },
+      "segment": "Выбор доли легкого (локализация)",
+      "segments": {
+        "rightUp": "Правая верхняя доля",
+        "rightMiddle": "Правая средняя доля",
+        "rightDown": "Правая нижняя доля",
+        "leftUp": "Левая верхняя доля",
+        "leftDown": "Левая нижняя доля"        
+      },
+      "pathology": "Тип патологии",
+      "pathologies": {
+        "covid19": "COVID-19",
+        "cancer": "Рак лёгкого",
+        "metastasis": "Метастатическое поражение лёгких"
+      },
+      "diseasesCount": "Количество",
+      "diseases": {
+        "single": "Единичное (1-3)",
+        "small": "Немногочисленные (4-10)",
+        "high": "Многочисленные (>10)"
+      },
+      "diseaseSize": "Размер очагов",
+      "diseasesSize": {
+        "extraSmall": "<5 мм",
+        "small": "5-10 мм",
+        "medium": "10-20 мм",
+        "high": ">20 мм"
+      }
     },
     "titles": {
       "create": "Новое исследование",

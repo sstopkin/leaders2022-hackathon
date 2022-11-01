@@ -12,8 +12,7 @@ import {
     Space,
     DeleteButton,
     ShowButton,
-    TagField,
-    Button, EditButton,
+    Button, EditButton, Icons,
 } from "@pankod/refine-antd";
 import {IResearch} from "interfaces";
 import {Roles} from "interfaces/roles";
@@ -39,8 +38,10 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
     return (
         <List headerButtons={({defaultButtons}) => <><Button
             onClick={() => navigate.push("/researches/generate/")}
-            type="primary">
-            Сгенерировать исследование
+            type="default"
+            icon={
+                <Icons.PlusSquareOutlined />}>
+            Сгенерировать
         </Button>{defaultButtons}</>}>
             <Table {...tableProps} rowKey="id">
                 <Table.Column
@@ -62,6 +63,11 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                     render={(value) => {
                         return <ResearchProcessingStatus status={value} />;
                     }}
+                />
+                <Table.Column
+                    dataIndex="parentResearchId"
+                    title={t("researches.fields.researchType")}
+                    render={(value) => (value) ? <TextField value={"Сгенерированное"}/> : <TextField value={t("Исходное")}/>}
                 />
                 <Table.Column
                     dataIndex="createdAt"

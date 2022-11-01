@@ -26,6 +26,7 @@ export interface IResearch {
     updatedAt: Date;
     deletedAt: Date;
     status: string;
+    parentResearchId: string;
 }
 
 export interface IDicom {
