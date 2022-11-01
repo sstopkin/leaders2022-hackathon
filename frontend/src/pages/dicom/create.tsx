@@ -2,32 +2,55 @@ import {
     useTranslate,
     IResourceComponentsProps, useNotification, useNavigation,
 } from "@pankod/refine-core";
-import {Button, Create, Form, getValueFromEvent, Icons, Input, RcFile, Upload, useForm} from "@pankod/refine-antd";
+import {Button, Create, Form, Icons, Input, useForm} from "@pankod/refine-antd";
 import {IDicom} from "interfaces";
 import {useLocation} from "react-router-dom";
 import axios from "axios";
 import {API_ROOT} from "../../constants";
 import axiosInstance from "../../setup";
-import React from "react";
+import React, {ChangeEvent} from "react";
+import {humanFileSize} from "../../utils";
 
 export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
     const notifications = useNotification();
     const navigation = useNavigation();
 
+    const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
     const {formProps, saveButtonProps, form} = useForm<IDicom>({action: "create", resource: "dicoms", redirect: false});
     const [isLoading, setLoading] = React.useState<boolean>(false);
+    const [currentFile, setCurrentFile] = React.useState<File | undefined>(undefined);
 
     const search = useLocation().search;
     const researchIdParam = new URLSearchParams(search).get('researchId');
 
+    const handleFileChange = (evt: ChangeEvent<HTMLInputElement>) => {
+        const files = evt.target.files;
+        if (files?.[0]) {
+            const uploadedFile = files[0];
+            setCurrentFile(uploadedFile);
+        }
+    }
+
+    const handleUploadButtonClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    }
+
+    const handleClearFile = () => {
+        setCurrentFile(undefined);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ""
+        }
+    }
 
     const onSubmitClick = async () => {
         setLoading(true);
         const researchId = form.getFieldValue('researchId');
-        const file: Array<RcFile> = form.getFieldValue('file');
 
-        if (!researchId || !file) {
+        if (!researchId || !currentFile) {
             notifications.open?.({
                 type: 'error',
                 message: 'Ошибка создания файла',
@@ -36,7 +59,7 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
         } else {
             try {
                 const createResponse = await axiosInstance.post(`${API_ROOT}/dicoms`, {
-                    name: file[0].name,
+                    name: currentFile.name,
                     researchId,
                     dicomType: 'original',
                     description: 'Test description'
@@ -49,10 +72,10 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
                 if (uploadingUrl) {
                     let options = {
                         headers: {
-                          'Content-Type': file[0].type
+                            'Content-Type': currentFile.type
                         }
-                      };
-                    await axios.put(uploadingUrl, file[0], options);
+                    };
+                    await axios.put(uploadingUrl, currentFile, options);
 
                     await axiosInstance.patch(`${API_ROOT}/dicoms/${dicomId}`, {
                         "isUploaded": true
@@ -76,10 +99,16 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
     }
 
     return (
-        <Create saveButtonProps={saveButtonProps}
-                footerButtons={() => <Button disabled={isLoading} loading={isLoading} icon={<Icons.SaveOutlined/>}
-                                             onClick={onSubmitClick}
-                                             type="primary">Сохранить</Button>}>
+        <Create
+            title={<div style={{display: 'flex', alignItems: 'center'}}><Button style={{marginRight: '8px'}}
+                                                                                onClick={navigation.goBack} type="text"
+                                                                                icon={
+                                                                                    <Icons.ArrowLeftOutlined/>}/><span>Загрузить файл для
+            исследования</span></div>} saveButtonProps={saveButtonProps}
+            footerButtons={() => <Button disabled={isLoading || !currentFile} loading={isLoading}
+                                         icon={<Icons.SaveOutlined/>}
+                                         onClick={onSubmitClick}
+                                         type="primary">Сохранить</Button>}>
             <Form {...formProps}
                   initialValues={{
                       researchId: researchIdParam,
@@ -97,23 +126,30 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
                 >
                     <Input disabled/>
                 </Form.Item>
-                <Form.Item
-                    label={t("researches.fields.file")}
-                    name="file"
-                    valuePropName="fileList"
-                    getValueFromEvent={getValueFromEvent}
-                    noStyle
-                    rules={[
-                        {
-                            required: true,
-                        },
-                    ]}
-                >
-                    <Upload disabled={isLoading} beforeUpload={() => false} name="file" accept=".dcm,.dicom" maxCount={1}>
-                        <Button icon={<Icons.UploadOutlined/>}>Загрузить файл</Button>
-                    </Upload>
-                </Form.Item>
             </Form>
+            <input onChange={handleFileChange} style={{display: 'none'}} ref={fileInputRef} type="file"
+                   accept=".dcm,.dicom"/>
+            {currentFile === undefined &&
+                <Button type="primary" onClick={handleUploadButtonClick} icon={<Icons.UploadOutlined/>}>Загрузить
+                    файл</Button>}
+            {currentFile &&
+                <div>
+                    <Icons.LinkOutlined/>
+                    <span
+                        style={{
+                            fontWeight: 'bold',
+                            marginLeft: '8px'
+                        }}>
+                                {currentFile.name} {humanFileSize(currentFile.size, true)}
+                            </span>
+                    <Button
+                        type="link"
+                        danger
+                        disabled={isLoading}
+                        onClick={handleClearFile}
+                        icon={<Icons.CloseOutlined/>}
+                    />
+                </div>}
         </Create>
     );
 };
