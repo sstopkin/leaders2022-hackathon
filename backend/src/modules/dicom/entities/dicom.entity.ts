@@ -10,19 +10,14 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { DicomType } from './dicom.type';
 import { Research } from '../../research/entities/research.entity';
 import { IsOptional } from 'class-validator';
 import { DicomStatus } from './dicom.status';
 
 @Entity({ name: 'dicoms' })
-@Index(
-  'dicomsResearchIdNameDicomTypeUniqueIdx',
-  ['researchId', 'name', 'dicomType'],
-  {
-    unique: true,
-  },
-)
+@Index('dicomsResearchIdNameUniqueIdx', ['researchId', 'name'], {
+  unique: true,
+})
 export class Dicom {
   @ApiProperty({
     description: 'ID',
@@ -41,14 +36,6 @@ export class Dicom {
   })
   @Column({ name: 'description', nullable: true })
   public description: string;
-
-  @ApiProperty({ description: 'DICOM file type', example: 'original' })
-  @Column({
-    type: 'enum',
-    enum: DicomType,
-    default: DicomType.ORIGINAL,
-  })
-  public dicomType: DicomType;
 
   @ApiProperty({ description: 'If DICOM file is uploaded' })
   @Column({ type: 'boolean', default: false })

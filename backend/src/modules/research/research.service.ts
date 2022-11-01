@@ -10,20 +10,18 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { makeFindAllQuryBuilder } from '../../core/db/query_builders/find_all';
 import { CloudService } from '../cloud/cloud.service';
 import { ResearchStatus } from './entities/research.status';
+import { GenerateResearchDto } from './dto/generate-research.dto';
 
 @Injectable()
 export class ResearchService {
   private readonly availableStatusChanges: Array<string> = [
-    `${ResearchStatus.CREATED}-${ResearchStatus.UPLOADING}`,
-    `${ResearchStatus.UPLOADING}-${ResearchStatus.UPLOADED}`,
-    `${ResearchStatus.UPLOADED}-${ResearchStatus.GENERATING}`,
-    `${ResearchStatus.GENERATING}-${ResearchStatus.GENERATED}`,
-
-    `${ResearchStatus.UPLOADED}-${ResearchStatus.IN_MARKUP}`,
-    `${ResearchStatus.GENERATING}-${ResearchStatus.IN_MARKUP}`,
-    `${ResearchStatus.GENERATED}-${ResearchStatus.IN_MARKUP}`,
+    `${ResearchStatus.CREATED}-${ResearchStatus.READY_TO_MARK}`,
+    `${ResearchStatus.READY_TO_MARK}-${ResearchStatus.IN_MARKUP}`,
     `${ResearchStatus.IN_MARKUP}-${ResearchStatus.MARKUP_DONE}`,
     `${ResearchStatus.MARKUP_DONE}-${ResearchStatus.IN_MARKUP}`,
+
+    `${ResearchStatus.CREATED}-${ResearchStatus.GENERATING}`,
+    `${ResearchStatus.GENERATING}-${ResearchStatus.READY_TO_MARK}`,
   ];
 
   public constructor(
@@ -80,6 +78,32 @@ export class ResearchService {
       status: ResearchStatus.CREATED,
       createdByUserId: createdByUserId,
     });
+  }
+
+  async generate(
+    createdByUserId: string,
+    dto: GenerateResearchDto,
+  ): Promise<void> {
+    const researchId = uuidv4();
+    await this.cloudService.putObject(`${researchId}/`);
+
+    const generatingParams = {
+      segments: dto.segments,
+      pathology: dto.pathology,
+      diseasesCount: dto.diseasesCount,
+      diseaseSize: dto.diseaseSize,
+    };
+
+    const research = new Research();
+    research.id = researchId;
+    research.status = ResearchStatus.GENERATING;
+    research.createdByUserId = createdByUserId;
+    research.name = dto.name;
+    research.description = dto.description;
+    research.parentResearchId = dto.parentResearchId;
+    research.generatingParams = generatingParams;
+
+    await this.repository.insert(research);
   }
 
   async update(id: string, dto: UpdateResearchDto): Promise<Research> {

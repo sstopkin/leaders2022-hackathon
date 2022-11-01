@@ -26,6 +26,7 @@ import { FindAllOptionsDto } from '../../core/dto/find_all/find_all_options.dto'
 import { ApiPaginatedResponse } from '../../core/api_docs/api_paginated_response';
 import { isQueryFailedError, PostgresErrorCode } from '../../core/db/db_errors';
 import { User } from '../user/entities/user.entity';
+import { GenerateResearchDto } from './dto/generate-research.dto';
 
 @Controller('researches')
 @ApiTags('Researches')
@@ -61,6 +62,18 @@ export class ResearchController {
     const user: User = request.user;
     return this.handleResearchUniqueError(() =>
       this.service.create(user.id, dto),
+    );
+  }
+
+  @Post('generate')
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
+  generate(
+    @Request() request,
+    @Body() dto: GenerateResearchDto,
+  ): Promise<void> {
+    const user: User = request.user;
+    return this.handleResearchUniqueError(() =>
+      this.service.generate(user.id, dto),
     );
   }
 

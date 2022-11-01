@@ -14,6 +14,7 @@ import {
 import { ResearchStatus } from './research.status';
 import { Dicom } from '../../dicom/entities/dicom.entity';
 import { User } from '../../user/entities/user.entity';
+import { ResearchGeneratingParams } from './research-generating-params.entity';
 
 @Entity({ name: 'researches' })
 export class Research {
@@ -50,6 +51,21 @@ export class Research {
     default: ResearchStatus.CREATED,
   })
   public status: ResearchStatus;
+
+  @ManyToOne(() => Research)
+  @JoinColumn({
+    name: 'parentResearchId',
+    referencedColumnName: 'id',
+  })
+  public parentResearch?: Research;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  @Index('researchesParentResearchIdIdx')
+  parentResearchId?: string;
+
+  @Column({ type: 'json', nullable: true })
+  public generatingParams?: ResearchGeneratingParams;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'createdByUserId', referencedColumnName: 'id' })
