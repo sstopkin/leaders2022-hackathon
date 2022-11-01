@@ -7,7 +7,7 @@ COPY requirements.txt .
 
 RUN pip install --upgrade pip && pip install -r requirements.txt \
                                              --no-cache-dir \
-                                             -f https://download.pytorch.org/whl/cu113
+                                             --extra-index-url https://download.pytorch.org/whl/cpu
 
 COPY app .
 

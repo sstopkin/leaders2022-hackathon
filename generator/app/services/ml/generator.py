@@ -6,7 +6,7 @@ from services.ml.src.generate import add_disease_to_dicoms
 from services.ml.src.utils.convert import pydicom_to_bytes, dicom_bytes_to_pydicom
 
 
-def remove_broken_dicoms(dicoms: list[FileDataset]):
+def remove_broken_dicoms(dicoms: List[FileDataset]):
     normal_dicoms = []
     broken_dicoms = []
     for idx, dcm in enumerate(dicoms):

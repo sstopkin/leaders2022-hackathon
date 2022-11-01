@@ -93,7 +93,8 @@ def add_disease_to_part_of_image(part, disease, lung_mask):
 
 
 def damage_image(image, segmentation, lung_segment_id):
-    G = torch.load("lastG.pt", map_location=torch.device("cpu"))
+    G: torch.nn.Module = torch.load("lastG.pt", map_location=torch.device("cpu"))
+    G.eval()
 
     image_part, mask_part, bbox_part = get_part_of_lung(image, segmentation, lung_segment_id)
     disease_h, disease_w = image_part.shape
@@ -113,7 +114,7 @@ def add_disease_to_dicoms(dicoms: List[FileDataset], lung_part_list: List[int]):
     model_input = get_dicom_images(dicoms)
 
     model = lungmask.get_model('unet', 'LTRCLobes')
-    segs = lungmask.apply(model_input, model)
+    segs = lungmask.apply(model_input, model, force_cpu=True)
 
     new_dicoms = []
 
