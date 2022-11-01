@@ -85,7 +85,8 @@
       "status": "Статус",
       "createdAt": "Создан",
       "updatedAt": "Обновлен",
-      "size": "Размер"
+      "size": "Размер",
+      "createdBy": "Создан"
     },
     "titles": {
       "create": "Новое исследование",
@@ -98,8 +99,7 @@
     "dicoms": "DICOM файлы",
     "fields": {
       "id": "Id",
-      "fileName": "Имя файла",
-      "fileId": "ID файла",
+      "name": "Имя",
       "processingStatus": "Статус",
       "createdAt": "Создан",
       "updatedAt": "Обновлен",
