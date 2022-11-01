@@ -4,6 +4,7 @@ import {
     useTranslate,
     useLogout,
     CanAccess,
+  useTitle,
     ITreeMenu,
     useRouterContext,
     useMenu
@@ -19,6 +20,7 @@ export const Sider: React.FC = () => {
     const {mutate: logout} = useLogout();
 
     const {Link} = useRouterContext();
+  const Title = useTitle();
     const {SubMenu} = Menu;
 
     const translate = useTranslate();
@@ -72,6 +74,7 @@ export const Sider: React.FC = () => {
             breakpoint="lg"
             style={isMobile ? antLayoutSiderMobile : antLayoutSider}
         >
+      {Title && <Title collapsed={collapsed} />}
             <Menu
                 selectedKeys={[selectedKey]}
                 defaultOpenKeys={defaultOpenKeys}

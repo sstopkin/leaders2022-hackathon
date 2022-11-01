@@ -154,7 +154,7 @@ export const DicomsCreate: React.FC<IResourceComponentsProps> = () => {
             >Сохранить
             </Button>}>
             <input multiple onChange={handleFileChange} style={{display: 'none'}} ref={fileInputRef} type="file"
-                   accept=".dcm,.dicom, .zip"/>
+                   accept=".dcm,.dicom,.zip"/>
             {currentFiles.length === 0 &&
                 <Button type="primary" onClick={handleUploadButtonClick} icon={<Icons.UploadOutlined/>}>Загрузить
                     файл(ы)</Button>}

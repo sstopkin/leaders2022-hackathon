@@ -44,6 +44,14 @@ export const Login: React.FC = () => {
             >
                 <Col xs={22}>
                     <div className="container">
+                        <div className="imageContainer">
+                            <img
+                                style={{ marginBottom: 0 }}
+                                src="/images/logo-dark.png"
+                                alt="Logo"
+                                width="100%"
+                            />
+                        </div>
                         <Card title={CardTitle} headStyle={{ borderBottom: 0 }}>
                             <Form<ILoginForm>
                                 layout="vertical"
