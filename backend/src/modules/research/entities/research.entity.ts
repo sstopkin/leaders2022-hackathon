@@ -26,6 +26,7 @@ export class Research {
 
   @ApiProperty({ description: 'Research name', example: 'Research' })
   @Column()
+  @Index('researchesNameIdx', { unique: true })
   public name: string;
 
   @ApiProperty({
