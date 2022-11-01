@@ -4,11 +4,8 @@ import cv2 as cv
 import numpy as np
 import torch
 from lungmask import mask as lungmask
-from pydicom.pixel_data_handlers.util import apply_modality_lut
 
-
-def get_dicom_images(dicoms):
-    return np.concatenate([apply_modality_lut(ds.pixel_array, ds)[None] for ds in dicoms])
+from services.ml.src.preprocess import get_dicom_images
 
 
 def get_part_of_lung(image, segmentation, lung_label):
@@ -69,24 +66,20 @@ def get_random_desease(G, lung_mask, desease_h, desease_w, ):
     return desease
 
 
-def add_desease_to_part_of_image(part, desease, lung_mask):
+def add_disease_to_part_of_image(part, disease, lung_mask):
     global_min_val = np.min(part)
     global_max_val = np.max(part)
 
     image_part = (part.copy() - global_min_val) / (global_max_val - global_min_val)
     image_part = image_part.astype(np.float32)
 
-    min_val = np.min(image_part)
     max_val = np.max(image_part)
-    mean_val = np.mean(image_part)
 
-    non_lung_indexes = lung_mask == False
-
-    desease = max_val * desease.copy()
+    disease = max_val * disease.copy()
     combo = image_part.copy()
 
-    combo[lung_mask] = combo[lung_mask] * 0.5 + desease[lung_mask] * 0.5
-    combo[lung_mask] = np.maximum(image_part[lung_mask], combo[lung_mask])  # desease[lung_mask])
+    combo[lung_mask] = combo[lung_mask] * 0.5 + disease[lung_mask] * 0.5
+    combo[lung_mask] = np.maximum(image_part[lung_mask], combo[lung_mask])
 
     combo = cv.GaussianBlur(combo, (3, 3), -1)
     combo = np.maximum(image_part, combo)
@@ -101,9 +94,9 @@ def damage_image(image, segmentation, lung_segment_id):
     G = torch.load("lastG.pt", map_location=torch.device("cpu"))
 
     image_part, mask_part, bbox_part = get_part_of_lung(image, segmentation, lung_segment_id)
-    desease_h, desease_w = image_part.shape
-    desease_original = get_random_desease(G=G, lung_mask=mask_part, desease_h=desease_h, desease_w=desease_w)
-    combo = add_desease_to_part_of_image(image_part, desease_original, mask_part)
+    disease_h, disease_w = image_part.shape
+    disease_original = get_random_desease(G=G, lung_mask=mask_part, desease_h=disease_h, desease_w=disease_w)
+    combo = add_disease_to_part_of_image(image_part, disease_original, mask_part)
 
     img_changed = image.copy()
 
@@ -114,7 +107,7 @@ def damage_image(image, segmentation, lung_segment_id):
     return img_changed
 
 
-def damage_dicoms(dicoms: list, lung_part: int):
+def add_disease_to_dicoms(dicoms: list, lung_part: int):
     model_input = get_dicom_images(dicoms)
 
     model = lungmask.get_model('unet', 'LTRCLobes')
