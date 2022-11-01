@@ -1,5 +1,5 @@
 import {
-    IResourceComponentsProps, useCustom, useNavigation,
+    IResourceComponentsProps, useNavigation,
     usePermissions,
     useTranslate,
 } from "@pankod/refine-core";
@@ -13,14 +13,15 @@ import {
     DeleteButton,
     ShowButton,
     TagField,
-    Button, Icons, EditButton,
+    Button, EditButton,
 } from "@pankod/refine-antd";
 import {IResearch} from "interfaces";
 import {Roles} from "interfaces/roles";
-import {API_ROOT, DATE_FORMAT} from "../../constants";
+import {DATE_FORMAT} from "../../constants";
 
 export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
+    const navigate = useNavigation();
 
     const {tableProps} = useTable<IResearch>({
         initialSorter: [
@@ -84,11 +85,8 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                             {permissionsData?.includes(Roles.ADMIN) && (
                                 <DeleteButton hideText size="small" recordItemId={record.id}/>
                             )}
-                            {/* <Button onClick={() => navigate.push(`/researches/show/${record.id}`)} type="primary"
+                            <Button onClick={() => navigate.push(`/dicom/show/${record.id}`)} type="primary"
                                     size="small">Разметить</Button>
-                            {permissionsData?.includes(Roles.ADMIN) && (
-                                <DeleteButton hideText size="small" recordItemId={record.id}/>
-                            )} */}
                         </Space>
                     )}
                 />

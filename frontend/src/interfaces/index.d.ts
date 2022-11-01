@@ -23,6 +23,7 @@ export interface IResearch {
     id: string;
     name: string;
     description: string;
+    createdByUserId: string;
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date;
@@ -30,8 +31,9 @@ export interface IResearch {
 
 export interface IDicom {
     id: string;
+    downloadingUrl: string;
     researchId: string;
-    fileName: string;
-    size: number;
+    name: string;
+    createdAt: string;
     isUploaded: boolean;
 }
