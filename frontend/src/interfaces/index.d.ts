@@ -25,6 +25,7 @@ export interface IResearch {
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date;
+    status: string;
 }
 
 export interface IDicom {

@@ -22,6 +22,7 @@ import { ResearchProcessingStatus } from "components/researchesStatus";
 
 
 export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
+    const navigate = useNavigation();
     const t = useTranslate();
 
     const {tableProps} = useTable<IResearch>({

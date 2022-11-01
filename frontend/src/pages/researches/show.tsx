@@ -28,6 +28,7 @@ import {API_ROOT, DATE_FORMAT} from "../../constants";
 import FileOutlined from "@ant-design/icons/lib/icons/FileOutlined";
 import React from "react";
 import {Roles} from "interfaces/roles";
+import { ResearchProcessingStatus } from "components";
 
 const {Title} = Typography;
 
@@ -74,6 +75,13 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
 
                         <Title level={5}>{t("researches.fields.id")}</Title>
                         <Typography.Text>{record?.id}</Typography.Text>
+
+                        <Title level={5}>{t("researches.fields.status")}</Title>
+                        <Typography.Text>
+                            <ResearchProcessingStatus
+                                status={record?.status || ""}
+                            />
+                        </Typography.Text>
 
                         <Title level={5}>{t("researches.fields.createdBy")}</Title>
                         <Typography.Text>

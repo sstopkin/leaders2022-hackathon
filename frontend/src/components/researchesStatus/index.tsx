@@ -8,10 +8,8 @@ type StatusProps = {
 
 export enum ResearchStatuses {
     CREATED = 'created',
-    UPLOADING = 'uploading',
-    UPLOADED = 'uploaded',
+    READY_TO_MARK = 'ready_to_mark',
     GENERATING = 'generating',
-    GENERATED = 'generated',
     IN_MARKUP = 'in_markup',
     MARKUP_DONE = 'markup_done',
     ERROR = 'error'
@@ -25,28 +23,22 @@ export const ResearchProcessingStatus: React.FC<StatusProps> = ({ status }) => {
         case ResearchStatuses.CREATED:
             color = "gray";
             break;
-        case ResearchStatuses.UPLOADING:
+        case ResearchStatuses.READY_TO_MARK:
             color = "orange";
-            break;
-        case ResearchStatuses.UPLOADED:
-            color = "green";
             break;
         case ResearchStatuses.GENERATING:
             color = "yellow";
-            break;
-        case ResearchStatuses.GENERATED:
-            color = "volcano";
             break;
         case ResearchStatuses.IN_MARKUP:
             color = "magenta";
             break;
         case ResearchStatuses.MARKUP_DONE:
-            color = "cyan";
+            color = "green";
             break;
         case ResearchStatuses.ERROR:
             color = "red";
             break;
     }
 
-    return <Tag color={color}>{t(`enum.orderStatuses.${status}`)}</Tag>;
+    return <Tag color={color}>{t(`researchStatuses.${status}`)}</Tag>;
 };

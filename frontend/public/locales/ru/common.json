@@ -113,13 +113,12 @@
   "table": {
     "actions": "Действия"
   },
-  "enum": {
-    "researchStatuses": {
-      "CREATED": "НЕ РАЗМЕЧЕН",
-      "IN_WORK": "В РАБОТЕ",
-      "REVIEW": "НА РЕВЬЮ",
-      "DONE": "ОБРАБОТАН"
-    }
+  "researchStatuses": {
+    "created": "CОЗДАН",
+    "ready_to_mark": "ГОТОВ К РАЗМЕТКЕ",
+    "generating": "ГЕНЕРАЦИЯ",
+    "in_markup": "В РАБОТЕ",
+    "markup_done": "РАЗМЕЧЕН"
   },
   "dicom": {
     "info": {
