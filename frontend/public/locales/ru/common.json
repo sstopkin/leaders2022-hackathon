@@ -151,7 +151,8 @@
     "ready_to_mark": "ГОТОВ К РАЗМЕТКЕ",
     "generating": "ГЕНЕРАЦИЯ",
     "in_markup": "В РАБОТЕ",
-    "markup_done": "РАЗМЕЧЕН"
+    "markup_done": "РАЗМЕЧЕН",
+    "error": "ОШИБКА"
   },
   "dicom": {
     "info": {

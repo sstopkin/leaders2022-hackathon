@@ -65,9 +65,12 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
             <Show
                 isLoading={isLoading}
                 canEdit={permissionsData?.includes(Roles.ADMIN)}
-                headerButtons={() => <Button type="primary" onClick={
-                    () => navigate.push(`/dicom/create?researchId=${record?.id}`)
-                } icon={<Icons.PlusOutlined/>}>Добавить файл</Button>}
+                headerButtons={({ defaultButtons }) => (
+                    <>
+                        {defaultButtons}
+                        <Button type="primary" onClick={() => navigate.push(`/dicom/create?researchId=${record?.id}`)} icon={<Icons.PlusOutlined/>}>Добавить файл</Button>
+                    </>
+                )}
             >
                 <Row gutter={[16, 16]}>
                     <Col xl={5} lg={24} xs={24}>
