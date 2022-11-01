@@ -3,6 +3,8 @@ FROM python:3.8-slim-buster
 RUN mkdir /pathologies-generator
 WORKDIR /pathologies-generator
 
+ARG ENV
+
 COPY requirements.txt .
 
 RUN pip install --upgrade pip && pip install -r requirements.txt \
