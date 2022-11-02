@@ -84,9 +84,6 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                         <Title level={4}>{t("researches.fields.name")}</Title>
                         <Typography.Text>{record?.name}</Typography.Text>
 
-                        <Title level={5}>{t("researches.fields.id")}</Title>
-                        <Typography.Text>{record?.id}</Typography.Text>
-
                         <Title level={5}>{t("researches.fields.status")}</Title>
                         <Typography.Text>
                             <ResearchProcessingStatus
