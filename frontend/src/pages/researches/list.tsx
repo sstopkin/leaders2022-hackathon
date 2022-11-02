@@ -45,12 +45,6 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
         </Button>{defaultButtons}</>}>
             <Table {...tableProps} rowKey="id">
                 <Table.Column
-                    dataIndex="id"
-                    key="id"
-                    title={t("researches.fields.id")}
-                    render={(value) => <TextField value={value}/>}
-                />
-                <Table.Column
                     dataIndex="name"
                     key="name"
                     title={t("researches.fields.name")}
@@ -97,8 +91,6 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                             {permissionsData?.includes(Roles.ADMIN) && (
                                 <DeleteButton hideText size="small" recordItemId={record.id}/>
                             )}
-                            {/* <Button onClick={() => navigate.push(`/dicom/show/${record.id}`)} type="primary"
-                                    size="small">Разметить</Button> */}
                         </Space>
                     )}
                 />

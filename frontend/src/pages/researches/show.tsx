@@ -109,27 +109,21 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                         )}
                         <Title level={5}>{t("researches.fields.description")}</Title>
                         <Typography.Text>
-                            <MarkdownField value={record?.description}/>
+                            <MarkdownField value={(record?.description) ? record?.description : '< отсутствует >'}/>
                         </Typography.Text>
                     </Col>
                     <Col xl={19} xs={24}>
                         <Title level={5}>{t("researches.fields.files")}</Title>
                         <Table
-                            // pagination={{
-                            //   ...filesData?.pagination,
-                            //   showSizeChanger: true,
-                            // }}
+                            pagination={{
+                              showSizeChanger: true,
+                            }}
                             dataSource={files}
                         >
                             <Table.Column
                                 dataIndex="name"
                                 key="name"
                                 title={t("dicoms.fields.name")}
-                            />
-                            <Table.Column
-                                dataIndex="id"
-                                key="id"
-                                title={t("dicoms.fields.id")}
                             />
                             <Table.Column
                                 dataIndex="createdAt"
