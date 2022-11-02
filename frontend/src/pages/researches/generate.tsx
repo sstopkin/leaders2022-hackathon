@@ -54,7 +54,7 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
                 </Form.Item>
                 <Form.Item
                     label={t("researches.fields.segment")}
-                    name="segment"
+                    name="segments"
                     rules={[
                         {
                             required: true,
@@ -89,7 +89,7 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
                 </Form.Item>
                 <Form.Item
                     label={t("researches.fields.pathology")}
-                    name="pathologies"
+                    name="pathology"
                     rules={[
                         {
                             required: true,
