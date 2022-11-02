@@ -79,7 +79,6 @@ interface DicomViewerProps {
 }
 
 const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
-    console.log(dicomFiles.length);
     const t = useTranslate();
     const notification = useNotification();
 
@@ -303,11 +302,11 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
                 toolGroupRef.current?.addTool(toolName);
                 if (toolName !== StackScrollMouseWheelTool.toolName) {
                     toolGroupRef.current?.setToolPassive(toolName);
+                } else {
+                    toolGroupRef.current?.setToolActive(toolName);
                 }
             })
         }
-
-        toolGroupRef.current?.addViewport(viewportId, renderingEngineId)
 
         const viewportInput = {
             viewportId,
@@ -315,9 +314,12 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
             element
         }
 
+        toolGroupRef.current?.addViewport(viewportId, renderingEngineId)
+
         renderingEngineRef.current.enableElement(viewportInput);
 
         viewportRef.current = renderingEngineRef.current.getViewport(viewportId) as IStackViewport;
+
         await viewportRef.current.setStack(imageIds);
 
         viewportRef.current.render();

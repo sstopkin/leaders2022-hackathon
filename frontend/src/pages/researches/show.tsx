@@ -61,8 +61,6 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
 
     const files = projectDicoms?.data || [];
 
-    console.log(data);
-
     return (
         <>
             <Show
