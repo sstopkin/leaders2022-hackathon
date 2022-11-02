@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsUUID } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 import {
   GeneratingDiseasesCount,
   GeneratingDiseasesSize,
@@ -9,17 +9,20 @@ import {
 
 export class GenerateResearchDto {
   @ApiProperty({ description: 'Research name', example: 'Research' })
+  @IsNotEmpty()
   public name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Description',
     example: 'Some research description',
   })
-  public description: string;
+  @IsOptional()
+  public description?: string;
 
   @ApiProperty({
     description: 'Parent research ID',
   })
+  @IsNotEmpty()
   @IsUUID()
   public parentResearchId: string;
 
@@ -27,6 +30,7 @@ export class GenerateResearchDto {
     isArray: true,
     enum: GeneratingSegment,
   })
+  @IsNotEmpty()
   @IsEnum(GeneratingSegment, { each: true })
   readonly segments: GeneratingSegment[];
 
