@@ -1,5 +1,6 @@
 import datetime
 import logging
+import uuid
 from typing import Optional, List
 
 from communicators import cloud_client
@@ -38,7 +39,10 @@ class MainGeneratorLoop(AbstractLoopService):
                 research=research,
                 original_dicoms_bytes=original_dicoms_bytes,
             )
-            created_dicoms = self._create_generated_dicoms(original_dicoms=original_dicoms)
+            created_dicoms = self._create_generated_dicoms(
+                researchId=research.id,
+                original_dicoms=original_dicoms,
+            )
             if len(created_dicoms) != len(generated_dicoms_bytes):
                 raise Exception(f'Original DICOM files size is not equal to generated DICOM files')
             #
@@ -104,13 +108,13 @@ class MainGeneratorLoop(AbstractLoopService):
 
         return generated_dicoms_bytes
 
-    def _create_generated_dicoms(self, original_dicoms: List[Dicom]) -> List[CreatedDicom]:
+    def _create_generated_dicoms(self, researchId: uuid.UUID, original_dicoms: List[Dicom]) -> List[CreatedDicom]:
         created_dicoms = []
         for original_dicom in original_dicoms:
             new_dicom: NewDicom = NewDicom(
                 name=original_dicom.name,
                 description=original_dicom.description,
-                researchId=str(original_dicom.researchId),
+                researchId=str(researchId),
             )
             try:
                 created_dicom: CreatedDicom = self._backend_client.create_dicom(dicom=new_dicom)
