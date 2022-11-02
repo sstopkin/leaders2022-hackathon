@@ -2,6 +2,7 @@ from typing import List
 
 from pydicom.dataset import FileDataset
 
+from entities.research_entities import ResearchGeneratingParams, segmets_lung_parts
 from services.ml.src.generate import add_disease_to_dicoms
 from services.ml.src.utils.convert import pydicom_to_bytes, dicom_bytes_to_pydicom
 
@@ -22,9 +23,12 @@ def remove_broken_dicoms(dicoms: List[FileDataset]):
 
 def generate_pathologies(
         original_dicoms_bytes: List[bytes],
-        lung_part_list: List[int] = [1, 2, 3, 4, 5]) -> List[bytes]:
+        generatingParams: ResearchGeneratingParams,
+) -> List[bytes]:
     dicoms = dicom_bytes_to_pydicom(dicom_bytes_list=original_dicoms_bytes)
     dicoms, broken_dicoms = remove_broken_dicoms(dicoms)
+
+    lung_part_list = list({segmets_lung_parts[segment] for segment in generatingParams.segments})
 
     new_dicoms = add_disease_to_dicoms(dicoms, lung_part_list=lung_part_list)
 

@@ -4,8 +4,8 @@ from uuid import UUID
 
 import requests
 
-from entities.dicom_entities import Dicom, DicomType, NewDicom, CreatedDicom
-from entities.research_entities import ResearchStatus, GetResearchesResponse, Research
+from entities.dicom_entities import Dicom, NewDicom, CreatedDicom
+from entities.research_entities import ResearchStatus, GetResearchesResponse, GeneratingResearch
 
 
 class BackendClient:
@@ -19,7 +19,7 @@ class BackendClient:
             'X-API-KEY': self._backend_api_key
         }
 
-    def get_research_to_generate(self) -> Optional[Research]:
+    def get_research_to_generate(self) -> Optional[GeneratingResearch]:
         url = f'{self._backend_api_base_url}/{self.researches_endpoint}'
         params = {
             'filter': 'status||$eq||generating',
@@ -40,15 +40,12 @@ class BackendClient:
     def get_research_uploaded_dicoms(
             self,
             research_id: uuid.UUID,
-            dicoms_type: Optional[DicomType] = None,
     ) -> List[Dicom]:
         url = f'{self._backend_api_base_url}/{self.dicoms_endpoint}'
         params = {
             'researchId': research_id,
             'filter': 'isUploaded||$eq||true',
         }
-        if dicoms_type:
-            params['dicomType'] = dicoms_type.value
 
         resp = requests.request('GET', url, params=params, headers=self._headers)
         self._validate_response_status(resp)

@@ -1,11 +1,12 @@
 import datetime
 import logging
+import uuid
 from typing import Optional, List
 
 from communicators import cloud_client
 from communicators.backend_client import BackendClient
-from entities.dicom_entities import Dicom, DicomType, NewDicom, CreatedDicom
-from entities.research_entities import Research, ResearchStatus
+from entities.dicom_entities import Dicom, NewDicom, CreatedDicom
+from entities.research_entities import GeneratingResearch, ResearchStatus
 from services.core.abstract_loop_service import AbstractLoopService
 from services.ml import generator
 
@@ -20,30 +21,40 @@ class MainGeneratorLoop(AbstractLoopService):
     def run_step(self):
         logger.debug('Started researches fetching which should be generated')
 
-        research = self._get_research_to_generate()
-        if research is None:
-            logger.debug('No researches to generate')
-            return
-        logger.info(f'Found research to generate: {research.id} - {research.name}')
+        research = None
+        try:
+            research = self._get_research_to_generate()
+            if research is None:
+                logger.debug('No researches to generate')
+                return
+            logger.info(f'Found research to generate: {research.id} - {research.name}')
+            #
+            original_dicoms = self._get_research_original_dicoms(research=research)
+            if len(original_dicoms) == 0:
+                logger.info(f'No DICOM files to generate from')
+                return
+            #
+            original_dicoms_bytes = self._download_dicoms(original_dicoms=original_dicoms)
+            generated_dicoms_bytes = self._generate_dicoms_with_pathologies(
+                research=research,
+                original_dicoms_bytes=original_dicoms_bytes,
+            )
+            created_dicoms = self._create_generated_dicoms(
+                research_id=research.id,
+                original_dicoms=original_dicoms,
+            )
+            if len(created_dicoms) != len(generated_dicoms_bytes):
+                raise Exception(f'Original DICOM files size is not equal to generated DICOM files')
+            #
+            self._upload_generated_dicoms(created_dicoms=created_dicoms, generated_dicoms_bytes=generated_dicoms_bytes)
+        except Exception as ex:
+            logger.error(f'Error during generating: {ex}')
+            if research:
+                self._set_research_status(research=research, status=ResearchStatus.ERROR)
+        else:
+            self._set_research_status(research=research, status=ResearchStatus.READY_TO_MARK)
 
-        original_dicoms = self._get_research_original_dicoms(research=research)
-        if len(original_dicoms) == 0:
-            logger.info(f'No DICOM files to generate from')
-            return
-
-        original_dicoms_bytes = self._download_dicoms(original_dicoms=original_dicoms)
-        generated_dicoms_bytes = self._generate_dicoms_with_pathologies(
-            research=research,
-            original_dicoms_bytes=original_dicoms_bytes,
-        )
-        created_dicoms = self._create_generated_dicoms(original_dicoms=original_dicoms)
-        if len(created_dicoms) != len(generated_dicoms_bytes):
-            raise Exception(f'Original DICOM files size is not equal to generated DICOM files')
-
-        self._upload_generated_dicoms(created_dicoms=created_dicoms, generated_dicoms_bytes=generated_dicoms_bytes)
-        self._set_research_status(research=research, status=ResearchStatus.GENERATED)
-
-    def _get_research_to_generate(self) -> Optional[Research]:
+    def _get_research_to_generate(self) -> Optional[GeneratingResearch]:
         try:
             research = self._backend_client.get_research_to_generate()
         except Exception as ex:
@@ -51,18 +62,17 @@ class MainGeneratorLoop(AbstractLoopService):
 
         return research
 
-    def _get_research_original_dicoms(self, research: Research) -> List[Dicom]:
+    def _get_research_original_dicoms(self, research: GeneratingResearch) -> List[Dicom]:
         try:
             dicoms = self._backend_client.get_research_uploaded_dicoms(
-                research_id=research.id,
-                dicoms_type=DicomType.ORIGINAL,
+                research_id=research.parentResearchId,
             )
         except Exception as ex:
             raise Exception(f'Error during getting research DICOM files: {ex}')
 
         return dicoms
 
-    def _set_research_status(self, research: Research, status: ResearchStatus):
+    def _set_research_status(self, research: GeneratingResearch, status: ResearchStatus):
         try:
             self._backend_client.update_research_status(
                 research_id=research.id,
@@ -86,24 +96,25 @@ class MainGeneratorLoop(AbstractLoopService):
 
         return original_dicoms_bytes
 
-    def _generate_dicoms_with_pathologies(self, research: Research, original_dicoms_bytes: List[bytes]):
-        generated_dicoms_bytes = []
+    def _generate_dicoms_with_pathologies(self, research: GeneratingResearch, original_dicoms_bytes: List[bytes]):
         try:
-            generated_dicoms_bytes = generator.generate_pathologies(original_dicoms_bytes=original_dicoms_bytes)
+            generated_dicoms_bytes = generator.generate_pathologies(
+                original_dicoms_bytes=original_dicoms_bytes,
+                generatingParams=research.generatingParams,
+            )
             logger.info(f'Generated DICOM files for research: {research.id} - {research.name}')
         except Exception as ex:
-            raise Exception(f'Error during generating DICOM files for research: {research.id} - {research.name}')
+            raise Exception(f'Error during generating DICOM files for research: {research.id} - {research.name}: {ex}')
 
         return generated_dicoms_bytes
 
-    def _create_generated_dicoms(self, original_dicoms: List[Dicom]) -> List[CreatedDicom]:
+    def _create_generated_dicoms(self, research_id: uuid.UUID, original_dicoms: List[Dicom]) -> List[CreatedDicom]:
         created_dicoms = []
         for original_dicom in original_dicoms:
             new_dicom: NewDicom = NewDicom(
                 name=original_dicom.name,
                 description=original_dicom.description,
-                dicomType=DicomType.GENERATED,
-                researchId=str(original_dicom.researchId),
+                researchId=str(research_id),
             )
             try:
                 created_dicom: CreatedDicom = self._backend_client.create_dicom(dicom=new_dicom)
