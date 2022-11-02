@@ -20,8 +20,8 @@ export class ResearchService {
     `${ResearchStatus.IN_MARKUP}-${ResearchStatus.MARKUP_DONE}`,
     `${ResearchStatus.MARKUP_DONE}-${ResearchStatus.IN_MARKUP}`,
 
-    `${ResearchStatus.CREATED}-${ResearchStatus.GENERATING}`,
     `${ResearchStatus.GENERATING}-${ResearchStatus.READY_TO_MARK}`,
+    `${ResearchStatus.GENERATING}-${ResearchStatus.ERROR}`,
   ];
 
   public constructor(
