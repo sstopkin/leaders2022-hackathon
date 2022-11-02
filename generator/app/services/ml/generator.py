@@ -30,8 +30,6 @@ def generate_pathologies(
 
     lung_part_list = list({segmets_lung_parts[segment] for segment in generatingParams.segments})
 
-    print(lung_part_list)
-
     new_dicoms = add_disease_to_dicoms(dicoms, lung_part_list=lung_part_list)
 
     for idx, broken_dcm in broken_dicoms:
