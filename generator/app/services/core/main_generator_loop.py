@@ -40,7 +40,7 @@ class MainGeneratorLoop(AbstractLoopService):
                 original_dicoms_bytes=original_dicoms_bytes,
             )
             created_dicoms = self._create_generated_dicoms(
-                researchId=research.id,
+                research_id=research.id,
                 original_dicoms=original_dicoms,
             )
             if len(created_dicoms) != len(generated_dicoms_bytes):
@@ -108,13 +108,13 @@ class MainGeneratorLoop(AbstractLoopService):
 
         return generated_dicoms_bytes
 
-    def _create_generated_dicoms(self, researchId: uuid.UUID, original_dicoms: List[Dicom]) -> List[CreatedDicom]:
+    def _create_generated_dicoms(self, research_id: uuid.UUID, original_dicoms: List[Dicom]) -> List[CreatedDicom]:
         created_dicoms = []
         for original_dicom in original_dicoms:
             new_dicom: NewDicom = NewDicom(
                 name=original_dicom.name,
                 description=original_dicom.description,
-                researchId=str(researchId),
+                researchId=str(research_id),
             )
             try:
                 created_dicom: CreatedDicom = self._backend_client.create_dicom(dicom=new_dicom)
