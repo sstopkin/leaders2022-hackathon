@@ -33,7 +33,7 @@ export const UsersShow: React.FC<IResourceComponentsProps> = () => {
 
       <Title level={5}>{t("users.fields.name")}</Title>
       <Typography.Text>
-        {returnFullNameFromUserObject(data)}
+        {returnFullNameFromUserObject(record)}
       </Typography.Text>
 
       <Title level={5}>{t("users.fields.role")}</Title>
