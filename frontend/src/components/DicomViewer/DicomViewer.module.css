@@ -66,6 +66,7 @@
 }
 
 .imageContainer {
+    position: relative;
     flex-grow: 1;
     background-color: #000;
 }
