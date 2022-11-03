@@ -4,6 +4,7 @@ from pydicom.dataset import FileDataset
 
 from entities.research_entities import ResearchGeneratingParams, segmets_lung_parts, GeneratingPathology
 from services.ml.src.cancer_generation import add_cancer_to_dicoms
+from services.ml.src.metastasis_generation import add_metastasis_to_dicoms
 from services.ml.src.covid_generation import add_covid_to_dicoms
 from services.ml.src.utils.convert import pydicom_to_bytes, dicom_bytes_to_pydicom
 
@@ -47,6 +48,10 @@ def generate_pathologies(
         new_dicoms = add_covid_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
     elif generatingParams.pathology == GeneratingPathology.CANCER:
         new_dicoms = add_cancer_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
+    elif generatingParams.pathology == GeneratingPathology.METASTASIS:
+        new_dicoms = add_metastasis_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
+    else:
+        ordered_dicoms
 
     original_ordered_dicoms = []
     for idx in range(len(ordered_dicoms)):
