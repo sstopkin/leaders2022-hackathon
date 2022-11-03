@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEmail,
@@ -19,15 +19,20 @@ export class CreateUserDto {
   @IsNotEmpty()
   public firstName: string;
 
+  @ApiPropertyOptional({ description: 'Middle name', example: 'John' })
+  @IsOptional()
+  @IsString()
+  public middleName?: string;
+
   @ApiProperty({ description: 'Last name', example: 'Smith' })
   @IsString()
   @IsNotEmpty()
   public lastName: string;
 
-  @ApiProperty({ description: 'Is user active?', example: 'true' })
-  @IsBoolean()
+  @ApiPropertyOptional({ description: 'Is user active?', example: 'true' })
   @IsOptional()
-  public isActive: boolean;
+  @IsBoolean()
+  public isActive?: boolean;
 
   @ApiProperty({ description: 'Password', example: 'password1' })
   @IsString()
@@ -47,8 +52,8 @@ export class CreateUserDto {
   @IsNotEmpty()
   public role: UserRole;
 
-  @ApiProperty({ description: 'Description', example: 'text' })
-  @IsString()
+  @ApiPropertyOptional({ description: 'Description', example: 'text' })
   @IsOptional()
-  public description: string;
+  @IsString()
+  public description?: string;
 }

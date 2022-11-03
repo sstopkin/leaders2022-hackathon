@@ -31,6 +31,10 @@ export class User {
   @Column()
   public firstName: string;
 
+  @ApiProperty({ description: 'Middle name', example: 'John' })
+  @Column({ nullable: true })
+  public middleName?: string;
+
   @ApiProperty({ description: 'Last name', example: 'Smith' })
   @Column()
   public lastName: string;

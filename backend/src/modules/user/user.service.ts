@@ -65,9 +65,18 @@ export class UserService {
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user: User = await this.getUserOrError(id);
 
-    user.email = updateUserDto.email;
-    user.firstName = updateUserDto.firstName;
-    user.lastName = updateUserDto.lastName;
+    if (!!updateUserDto.email) {
+      user.email = updateUserDto.email;
+    }
+    if (!!updateUserDto.firstName) {
+      user.firstName = updateUserDto.firstName;
+    }
+    if (!!updateUserDto.middleName) {
+      user.middleName = updateUserDto.middleName;
+    }
+    if (!!updateUserDto.lastName) {
+      user.lastName = updateUserDto.lastName;
+    }
     if (updateUserDto.password && updateUserDto.passwordConfirmation) {
       if (updateUserDto.password !== updateUserDto.passwordConfirmation) {
         throw new BadRequestException(
@@ -79,9 +88,15 @@ export class UserService {
         this.BCRYPT_SALT_ROUNDS,
       );
     }
-    user.isActive = updateUserDto.isActive;
-    user.role = updateUserDto.role;
-    user.description = updateUserDto.description;
+    if (!!updateUserDto.isActive) {
+      user.isActive = updateUserDto.isActive;
+    }
+    if (!!updateUserDto.role) {
+      user.role = updateUserDto.role;
+    }
+    if (!!updateUserDto.description) {
+      user.description = updateUserDto.description;
+    }
 
     return this.repository.save(user);
   }
