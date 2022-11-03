@@ -76,6 +76,15 @@ export class Research {
   @Index('researchesUserIdIdx')
   createdByUserId: string;
 
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'assigneeUserId', referencedColumnName: 'id' })
+  public assigneeUser: User;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  @Index('researchesAssigneeUserIdIdx')
+  assigneeUserId: string;
+
   @ApiProperty({ description: 'Research creation timestamp' })
   @CreateDateColumn({
     type: 'timestamp',

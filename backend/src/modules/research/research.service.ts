@@ -118,6 +118,9 @@ export class ResearchService {
       this.validateStatusChanging(research.status, dto.status);
       research.status = dto.status;
     }
+    if (!!dto.assigneeUserId) {
+      research.assigneeUserId = dto.assigneeUserId;
+    }
 
     return this.repository.save(research);
   }
