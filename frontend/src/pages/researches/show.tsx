@@ -30,11 +30,11 @@ import {API_ROOT, DATE_FORMAT} from "../../constants";
 import FileOutlined from "@ant-design/icons/lib/icons/FileOutlined";
 import React from "react";
 import {Roles} from "interfaces/roles";
-import {ResearchProcessingStatus} from "components";
+import {ResearchProcessingStatus, ResearchStatuses} from "components";
 import Truncate from "react-truncate";
 import axios from "axios";
 import * as zip from "@zip.js/zip.js";
-import { returnFullNameFromUserObject } from "utils";
+import {returnFullNameFromUserObject} from "utils";
 
 const {Title} = Typography;
 
@@ -69,16 +69,16 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
 
     const {queryResult} = useShow<IResearch>();
     const {data, isLoading} = queryResult;
-    const record = data?.data;
+    const researchRecord = data?.data;
 
     const {data: createdByInfo} = useOne<IUser>({
         resource: "users",
-        id: (record?.createdByUserId as any) ?? "",
+        id: (researchRecord?.createdByUserId as any) ?? "",
     });
 
     const {data: assigneeUser} = useOne<IUser>({
         resource: "users",
-        id: (record?.assigneeUserId as any) ?? "",
+        id: (researchRecord?.assigneeUserId as any) ?? "",
     });
 
     const {data: researchDicoms, refetch} = useCustom<Array<IDicom>>({
@@ -86,7 +86,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
         method: "get",
         config: {
             query: {
-                researchId: record?.id,
+                researchId: researchRecord?.id,
             },
         },
     });
@@ -111,7 +111,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
 
         const anchor = document.createElement("a");
         anchor.href = blobUrl;
-        anchor.download = record?.name || 'research'
+        anchor.download = researchRecord?.name || 'research'
         anchor.click();
         anchor.remove();
         setUploading(false);
@@ -132,15 +132,16 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                             type="primary"
                             icon={<Icons.UploadOutlined/>}
                         >
-                            Загрузить исследование
+                            Загрузить
                         </Button>
-                        <Button
+                        {researchRecord?.status === ResearchStatuses.READY_TO_MARK && <Button
                             type="primary"
-                            onClick={() => navigate.push(`/dicom/show?researchId=${record?.id}`)}
+                            onClick={() => navigate.push(`/dicom/show?researchId=${researchRecord?.id}`)}
                             icon={<Icons.EditOutlined/>}>
-                            Разметить исследование
-                        </Button>
-                        <Button type="primary" onClick={() => navigate.push(`/dicom/create?researchId=${record?.id}`)}
+                            Разметить
+                        </Button>}
+                        <Button type="primary"
+                                onClick={() => navigate.push(`/dicom/create?researchId=${researchRecord?.id}`)}
                                 icon={<Icons.PlusOutlined/>}>Добавить файл(ы)</Button>
                     </>
                 )}
@@ -148,12 +149,12 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                 <Row gutter={[16, 16]}>
                     <Col xl={5} lg={24} xs={24}>
                         <Title level={4}>{t("researches.fields.name")}</Title>
-                        <Typography.Text>{record?.name}</Typography.Text>
+                        <Typography.Text>{researchRecord?.name}</Typography.Text>
 
                         <Title level={5}>{t("researches.fields.status")}</Title>
                         <Typography.Text>
                             <ResearchProcessingStatus
-                                status={record?.status || ""}
+                                status={researchRecord?.status || ""}
                             />
                         </Typography.Text>
 
@@ -164,20 +165,21 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
 
                         <Title level={5}>{t("researches.fields.assigneeUser")}</Title>
                         <Typography.Text>
-                            {(record?.assigneeUserId) ? returnFullNameFromUserObject(assigneeUser?.data) : 'не назначено'}
+                            {(researchRecord?.assigneeUserId) ? returnFullNameFromUserObject(assigneeUser?.data) : 'не назначено'}
                         </Typography.Text>
 
-                        {(record?.parentResearchId) && (
+                        {(researchRecord?.parentResearchId) && (
                             <>
                                 <Title level={5}>{t("researches.fields.parentResearch")}</Title>
                                 <Typography.Text>
-                                    <UrlField value={record?.parentResearchId}/>
+                                    <UrlField value={researchRecord?.parentResearchId}/>
                                 </Typography.Text>
                             </>
                         )}
                         <Title level={5}>{t("researches.fields.description")}</Title>
                         <Typography.Text>
-                            <MarkdownField value={(record?.description) ? record?.description : '< отсутствует >'}/>
+                            <MarkdownField
+                                value={(researchRecord?.description) ? researchRecord?.description : '< отсутствует >'}/>
                         </Typography.Text>
                     </Col>
                     <Col xl={19} xs={24}>
@@ -192,7 +194,8 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                                 dataIndex="name"
                                 key="name"
                                 title={t("dicoms.fields.name")}
-                                render={(value) => <Tooltip title={value}><Truncate width={210} lines={1}>{value}</Truncate></Tooltip>}
+                                render={(value) => <Tooltip title={value}><Truncate width={210}
+                                                                                    lines={1}>{value}</Truncate></Tooltip>}
                             />
                             <Table.Column
                                 dataIndex="createdAt"
@@ -232,7 +235,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                                             </a>
                                         </>
                                     )}
-                                    {permissionsData?.includes(Roles.ADMIN) && (
+                                    {permissionsData?.includes(Roles.ADMIN) && researchRecord?.status === ResearchStatuses.CREATED && (
                                         <DeleteButton
                                             onSuccess={() => refetch()}
                                             hideText size="small"
