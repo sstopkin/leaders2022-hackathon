@@ -71,7 +71,7 @@ services:
     environment:
       MINIO_ROOT_USER: root
       MINIO_ROOT_PASSWORD: ZGzoD9iZSpHuVaufnmog3vZldNVCuZmVT6sMPHaekIc274jKeLzxRcANr8Z4ld1h
-      MINIO_BROWSER_REDIRECT_URL: "http://172.17.10.19:9001"
+      MINIO_BROWSER_REDIRECT_URL: "http://172.17.10.19:9001" # Restrict access to Minio Console
     volumes:
       - minio_data:/data
     ports:
