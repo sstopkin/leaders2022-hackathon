@@ -33,7 +33,7 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
     const navigate = useNavigation();
     const t = useTranslate();
 
-    const { tableProps, sorter, searchFormProps, filters } = useTable<IResearch,
+    const { tableProps, searchFormProps, filters } = useTable<IResearch,
     HttpError,
     IResearchFilterVariables>({
         initialSorter: [
@@ -45,13 +45,13 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
         onSearch: (params) => {
           const filters: CrudFilters = [];
           const { name, createdAt, status } = params;
-    
+
           filters.push({
             field: "name",
             operator: "contains",
             value: name ? name : undefined,
           });
-    
+
           filters.push({
             field: "status",
             operator: "eq",
@@ -60,7 +60,7 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                 ? status
                 : undefined,
           });
-    
+
           filters.push(
             {
               field: "createdAt",
@@ -77,7 +77,7 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                 : undefined,
             }
           );
-    
+
           return filters;
         },
       });
@@ -165,13 +165,13 @@ const Filter: React.FC<{ formProps: FormProps; filters: CrudFilters }> = (
     props
   ) => {
     const {i18n, t} = useTranslation();
-  
+
     const { formProps, filters } = props;
     const { selectProps: researchesSelectProps } = useSelect<IResearch>({
       resource: "researches",
       defaultValue: getDefaultFilter("research.id", filters),
     });
-  
+
     const { RangePicker } = DatePicker;
 
     const dateLocale = useMemo(() => {
@@ -184,20 +184,20 @@ const Filter: React.FC<{ formProps: FormProps; filters: CrudFilters }> = (
           }
       }
   }, [i18n.language])
-  
+
     const created_date = useMemo(() => {
       const start = getDefaultFilter("createdAt", filters, "gte");
       const end = getDefaultFilter("createdAt", filters, "lte");
-  
+
       const startFrom = dayjs(start);
       const endAt = dayjs(end);
-  
+
       if (start && end) {
         return [startFrom, endAt];
       }
       return undefined;
     }, [filters]);
-  
+
     return (
       <Form
         layout="vertical"

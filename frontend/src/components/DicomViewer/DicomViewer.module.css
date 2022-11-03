@@ -45,26 +45,6 @@
     flex-direction: column;
 }
 
-.annotationsInfoList {
-    list-style: none;
-    padding: 12px;
-    margin: 0;
-    flex: 1 1 auto;
-    overflow-y: auto;
-    height: 0;
-    background-color: white;
-}
-
-.annotationsInfoListItem {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    border: 1px solid #D9D9D9;
-    border-radius: 4px;
-    padding: 4px 4px 4px 8px;
-}
-
 .imageContainer {
     position: relative;
     flex-grow: 1;
