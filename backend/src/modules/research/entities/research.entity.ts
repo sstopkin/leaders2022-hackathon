@@ -68,6 +68,7 @@ export class Research {
   @Column({ type: 'json', nullable: true })
   public generatingParams?: ResearchGeneratingParams;
 
+  @ApiProperty({ description: 'Markup' })
   @Column({ type: 'json', nullable: true })
   @IsOptional()
   public markup?: any;
