@@ -66,7 +66,7 @@ const toolsNames = [
 cornerstoneTools.addTool(StackScrollMouseWheelTool)
 cornerstoneTools.addTool(LengthTool)
 cornerstoneTools.addTool(PanTool)
-cornerstoneTools.addTool(WindowLevelTool)
+// cornerstoneTools.addTool(WindowLevelTool)
 cornerstoneTools.addTool(ZoomTool)
 cornerstoneTools.addTool(RectangleROITool)
 cornerstoneTools.addTool(EllipticalROITool)
@@ -82,6 +82,19 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
     const t = useTranslate();
     const notification = useNotification();
 
+    const CustomLevel = React.useRef(class CustomLevel extends WindowLevelTool {
+        getNewRange({
+                        viewport,
+                        deltaPointsCanvas,
+                        volumeId,
+                        lower,
+                        upper
+                    }: { viewport: any; deltaPointsCanvas: any; volumeId: any; lower: any; upper: any }): { lower: number; upper: number } {
+            setVoiRange({upper, lower});
+            return super.getNewRange({viewport, deltaPointsCanvas, volumeId, lower, upper});
+        }
+    })
+
     const imageZoneRef = React.useRef<null | HTMLDivElement>(null)
     const hiddenImportAnnotationInputRef = React.useRef<null | HTMLInputElement>(null)
     const toolGroupRef = React.useRef<IToolGroup | undefined>(undefined)
@@ -96,8 +109,10 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
         toolName: string,
         isVisible: boolean
     }>>([]);
+    const [voiRange, setVoiRange] = React.useState<undefined | { upper: number, lower: number }>(undefined)
 
     React.useEffect(() => {
+        cornerstoneTools.addTool(CustomLevel.current);
         return () => {
             ToolGroupManager.destroyToolGroup(toolGroupId);
         }
@@ -185,14 +200,16 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
         if (imageZoneRef.current && activeTool) {
             const element = imageZoneRef.current;
             const currentAnnotationToolState = cornerstoneTools.annotation.state.getAnnotations(element, activeTool);
-            const lastStateItem = currentAnnotationToolState[currentAnnotationToolState.length - 1];
-            if (!annotationsState.find(annotation => annotation.uuid === lastStateItem.annotationUID)) {
-                const convertedStateItem = {
-                    uuid: lastStateItem.annotationUID || "",
-                    toolName: lastStateItem.metadata.toolName,
-                    isVisible: true
+            if (currentAnnotationToolState) {
+                const lastStateItem = currentAnnotationToolState[currentAnnotationToolState.length - 1];
+                if (!annotationsState.find(annotation => annotation.uuid === lastStateItem.annotationUID)) {
+                    const convertedStateItem = {
+                        uuid: lastStateItem.annotationUID || "",
+                        toolName: lastStateItem.metadata.toolName,
+                        isVisible: true
+                    }
+                    setAnnotationsState([convertedStateItem, ...annotationsState]);
                 }
-                setAnnotationsState([convertedStateItem, ...annotationsState]);
             }
         }
     }
@@ -324,6 +341,10 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
 
         viewportRef.current.render();
 
+        const viewportProperties = viewportRef.current?.getProperties();
+        const currentVoiRange = viewportProperties.voiRange;
+        setVoiRange(currentVoiRange);
+
         viewportRef.current.canvas.oncontextmenu = (event) => event.preventDefault()
 
         setFileLoaded(true);
@@ -418,7 +439,17 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
             </div>
             <div
                 onMouseUp={handleAnnotationDraw}
-                ref={imageZoneRef} className={styles.imageContainer}/>
+                ref={imageZoneRef} className={styles.imageContainer}>
+                {voiRange &&
+                    <div style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        color: 'white',
+                        fontWeight: 'bold',
+                        padding: '4px'
+                    }}>WW {voiRange.upper.toFixed(3)} / WL {voiRange.lower.toFixed(3)}</div>}
+            </div>
             <div className={styles.rightSidePanel}>
                 <div>
                     {toolsNames.filter(toolName => toolName !== StackScrollMouseWheelTool.toolName).map(toolName =>
