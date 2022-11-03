@@ -32,7 +32,7 @@ export class UserController {
   constructor(private readonly usersService: UserService) {}
 
   @Get()
-  @UseGuards(RoleGuard([UserRole.ADMIN]))
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
   @ApiOperation({ summary: 'Return all users' })
   findAll() {
     return this.usersService.findAll();
