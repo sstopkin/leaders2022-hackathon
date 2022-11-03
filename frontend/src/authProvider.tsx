@@ -1,5 +1,6 @@
 import { AuthProvider } from "@pankod/refine-core";
 import * as constants from "./constants";
+import { returnFullNameFromUserObject } from "./utils";
 import jwt_decode from "jwt-decode";
 
 
@@ -73,7 +74,7 @@ export const authProvider: AuthProvider = {
     const data = JSON.parse(profile);
     const user = {
       id: data.id,
-      name: `${data.firstName} ${data.lastName}`,
+      name: returnFullNameFromUserObject(data),
       // avatar: "https://i.pravatar.cc/150?u=refine",
     };
     return Promise.resolve(user);

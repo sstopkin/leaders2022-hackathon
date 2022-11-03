@@ -55,6 +55,7 @@
       "email": "E-mail адрес",
       "firstName": "Имя",
       "lastName": "Фамилия",
+      "middleName": "Отчество",
       "name": "Пользователь",
       "password": "Пароль",
       "passwordConfirmation": "Подтверждение пароля",
@@ -86,7 +87,8 @@
       "createdAt": "Создан",
       "updatedAt": "Обновлен",
       "size": "Размер",
-      "createdBy": "Создан",
+      "createdBy": "Создано",
+      "assigneeUser": "Назначено",
       "parentResearch": "Исходное исследование",
       "researchType": "Тип исследования",
       "researchTypes": {
@@ -125,7 +127,7 @@
       "title": "Сортировка",
       "search": {
         "label": "Найти",
-        "placeholder": "Имя проекта"
+        "placeholder": "Имя"
       },
       "status": {
         "label": "Статус",

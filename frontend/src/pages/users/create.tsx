@@ -40,6 +40,24 @@ export const UsersCreate: React.FC<IResourceComponentsProps> = () => {
           <Input />
         </Form.Item>
         <Form.Item
+          label={t("users.fields.lastName")}
+          name="lastName"
+          rules={[
+            {
+              required: true,
+            },
+            {
+              min: 1,
+              max: 50
+            },
+            {
+              pattern: new RegExp('^[a-zA-Z-]*$')
+            }
+          ]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
           label={t("users.fields.firstName")}
           name="firstName"
           rules={[
@@ -58,12 +76,9 @@ export const UsersCreate: React.FC<IResourceComponentsProps> = () => {
           <Input />
         </Form.Item>
         <Form.Item
-          label={t("users.fields.lastName")}
-          name="lastName"
+          label={t("users.fields.middleName")}
+          name="middleName"
           rules={[
-            {
-              required: true,
-            },
             {
               min: 1,
               max: 50

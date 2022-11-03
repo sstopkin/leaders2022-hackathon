@@ -6,8 +6,9 @@ export interface ICategory {
 export interface IUser {
     id: string;
     email: string;
-    firstName: string;
     lastName: string;
+    firstName: string;
+    middleName: string;
     createdAt: Date;
     updatedAt: Date;
     isActive: boolean;
@@ -28,12 +29,11 @@ export interface IResearch {
     status: string;
     dicoms: Array<IDicom>
     parentResearchId: string;
+    assigneeUserId: string;
 }
 
 export interface IResearchFilterVariables {
     name?: string;
-    // store?: string;
-    // user?: string;
     createdAt?: [Dayjs, Dayjs];
     status?: string;
   }

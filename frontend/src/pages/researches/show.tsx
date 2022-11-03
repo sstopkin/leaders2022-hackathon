@@ -22,6 +22,7 @@ import {
     Col,
     DeleteButton,
     UrlField,
+    Tooltip,
 } from "@pankod/refine-antd";
 
 import {IDicom, IResearch, IUser} from "interfaces";
@@ -33,6 +34,7 @@ import {ResearchProcessingStatus} from "components";
 import Truncate from "react-truncate";
 import axios from "axios";
 import * as zip from "@zip.js/zip.js";
+import { returnFullNameFromUserObject } from "utils";
 
 const {Title} = Typography;
 
@@ -72,6 +74,11 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
     const {data: createdByInfo} = useOne<IUser>({
         resource: "users",
         id: (record?.createdByUserId as any) ?? "",
+    });
+
+    const {data: assigneeUser} = useOne<IUser>({
+        resource: "users",
+        id: (record?.assigneeUserId as any) ?? "",
     });
 
     const {data: researchDicoms, refetch} = useCustom<Array<IDicom>>({
@@ -152,12 +159,17 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
 
                         <Title level={5}>{t("researches.fields.createdBy")}</Title>
                         <Typography.Text>
-                            {createdByInfo?.data.firstName} {createdByInfo?.data.lastName}
+                            {returnFullNameFromUserObject(createdByInfo?.data)}
+                        </Typography.Text>
+
+                        <Title level={5}>{t("researches.fields.assigneeUser")}</Title>
+                        <Typography.Text>
+                            {(record?.assigneeUserId) ? returnFullNameFromUserObject(assigneeUser?.data) : 'не назначено'}
                         </Typography.Text>
 
                         {(record?.parentResearchId) && (
                             <>
-                                <Title level={5}>{t("researches.fields.createdBy")}</Title>
+                                <Title level={5}>{t("researches.fields.parentResearch")}</Title>
                                 <Typography.Text>
                                     <UrlField value={record?.parentResearchId}/>
                                 </Typography.Text>
@@ -180,9 +192,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                                 dataIndex="name"
                                 key="name"
                                 title={t("dicoms.fields.name")}
-                                render={(value) => <Truncate width={210}
-                                                             lines={1}>{value}</Truncate>
-                                }
+                                render={(value) => <Tooltip title={value}><Truncate width={210} lines={1}>{value}</Truncate></Tooltip>}
                             />
                             <Table.Column
                                 dataIndex="createdAt"
@@ -210,20 +220,6 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                                 title={t("table.actions")}
                                 dataIndex="actions"
                                 render={(_, record) => <Space>
-                                    {record.isUploaded && (
-                                        <>
-                                            <Button onClick={() => navigate.push(`/dicom/show/${record.id}`)}
-                                                    size="small" icon={<Icons.EyeOutlined/>}/>
-                                            <a
-                                                href={record.downloadingUrl}
-                                                download={record.id}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                <Button size="small" icon={<FileOutlined/>}/>
-                                            </a>
-                                        </>
-                                    )}
                                     {permissionsData?.includes(Roles.ADMIN) && (
                                         <DeleteButton
                                             onSuccess={() => refetch()}

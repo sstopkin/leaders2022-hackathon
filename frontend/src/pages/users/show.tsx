@@ -8,6 +8,7 @@ import { Show, Typography, Tag, MarkdownField, Icons } from "@pankod/refine-antd
 
 import { Roles } from "interfaces/roles";
 import { IUser } from "interfaces";
+import { returnFullNameFromUserObject } from "utils";
 
 const { Title } = Typography;
 
@@ -32,7 +33,7 @@ export const UsersShow: React.FC<IResourceComponentsProps> = () => {
 
       <Title level={5}>{t("users.fields.name")}</Title>
       <Typography.Text>
-        {record?.firstName} {record?.lastName}
+        {returnFullNameFromUserObject(data)}
       </Typography.Text>
 
       <Title level={5}>{t("users.fields.role")}</Title>

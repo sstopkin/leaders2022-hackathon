@@ -50,6 +50,12 @@ export const UsersList: React.FC<IResourceComponentsProps> = () => {
           render={(value) => <TextField value={value} />}
         />
         <Table.Column
+          dataIndex="middleName"
+          key="middleName"
+          title={t("users.fields.middleName")}
+          render={(value) => <TextField value={(value) ? value : '-'} />}
+        />
+        <Table.Column
           dataIndex="lastName"
           key="lastName"
           title={t("users.fields.lastName")}
