@@ -15,6 +15,7 @@ import { ResearchStatus } from './research.status';
 import { Dicom } from '../../dicom/entities/dicom.entity';
 import { User } from '../../user/entities/user.entity';
 import { ResearchGeneratingParams } from './research-generating-params.entity';
+import { IsOptional } from 'class-validator';
 
 @Entity({ name: 'researches' })
 export class Research {
@@ -66,6 +67,10 @@ export class Research {
 
   @Column({ type: 'json', nullable: true })
   public generatingParams?: ResearchGeneratingParams;
+
+  @Column({ type: 'json', nullable: true })
+  @IsOptional()
+  public markup?: any;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'createdByUserId', referencedColumnName: 'id' })
