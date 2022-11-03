@@ -11,7 +11,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Research } from '../../research/entities/research.entity';
-import { IsOptional } from 'class-validator';
 import { DicomStatus } from './dicom.status';
 
 @Entity({ name: 'dicoms' })
@@ -48,10 +47,6 @@ export class Dicom {
   @Column()
   @Index('dicomsResearchIdIdx')
   researchId: string;
-
-  @Column({ type: 'json', nullable: true })
-  @IsOptional()
-  public markup?: any;
 
   @ApiProperty({ description: 'DICOM file status', example: 'in_markup' })
   @Column({

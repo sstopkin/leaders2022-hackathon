@@ -121,6 +121,9 @@ export class ResearchService {
     if (!!dto.assigneeUserId) {
       research.assigneeUserId = dto.assigneeUserId;
     }
+    if (!!dto.markup) {
+      research.markup = dto.markup;
+    }
 
     return this.repository.save(research);
   }

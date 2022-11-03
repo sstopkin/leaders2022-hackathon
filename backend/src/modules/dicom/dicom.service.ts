@@ -100,7 +100,6 @@ export class DicomService {
     dicom.research = research;
     dicom.status = DicomStatus.NOT_MARKED;
     dicom.isUploaded = false;
-    dicom.markup = null;
     const savedDicom = await this.dicomRepository.save(dicom);
 
     return await this.makeGetDicomDto(savedDicom);
@@ -117,9 +116,6 @@ export class DicomService {
     }
     if (updateDicomDto.isUploaded) {
       dicom.isUploaded = updateDicomDto.isUploaded;
-    }
-    if (!!updateDicomDto.markup) {
-      dicom.markup = updateDicomDto.markup;
     }
     if (!!updateDicomDto.status) {
       this.validateStatusChanging(dicom.status, updateDicomDto.status);
@@ -152,7 +148,6 @@ export class DicomService {
         `${dicom.researchId}/${dicom.id}/dicom`,
       );
     }
-    dicomDto.markup = dicom.markup;
     dicomDto.status = dicom.status;
     dicomDto.createdAt = dicom.createdAt;
     dicomDto.updatedAt = dicom.updatedAt;
