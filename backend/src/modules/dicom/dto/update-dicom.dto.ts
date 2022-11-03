@@ -1,11 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsEnum,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { DicomStatus } from '../entities/dicom.status';
 
 export class UpdateDicomDto {
@@ -21,11 +15,6 @@ export class UpdateDicomDto {
   @IsOptional()
   @IsBoolean()
   public isUploaded?: boolean;
-
-  @ApiPropertyOptional({ description: 'DICOM file markup' })
-  @IsOptional()
-  @ValidateNested({ each: true })
-  public markup?: any;
 
   @ApiPropertyOptional({
     description: 'DICOM file status',

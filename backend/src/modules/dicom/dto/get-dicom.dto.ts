@@ -47,10 +47,6 @@ export class GetDicomDto {
   @IsUrl()
   public downloadingUrl?: string;
 
-  @ApiProperty()
-  @IsOptional()
-  public markup?: any;
-
   @ApiProperty({ description: 'DICOM file status', example: 'in_markup' })
   @IsNotEmpty()
   @IsEnum(DicomStatus)
