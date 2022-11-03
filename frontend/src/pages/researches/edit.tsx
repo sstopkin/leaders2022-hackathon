@@ -62,7 +62,7 @@ export const ResearchesEdit: React.FC<IResourceComponentsProps> = () => {
                             {
                                 label: t("researchStatuses.markup_done"),
                                 value: "markup_done",
-                            },
+                            }
                         ]}
                     />
                 </Form.Item>
