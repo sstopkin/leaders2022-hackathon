@@ -220,6 +220,18 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                                 title={t("table.actions")}
                                 dataIndex="actions"
                                 render={(_, record) => <Space>
+                                    {record.isUploaded && (
+                                        <>
+                                            <a
+                                                href={record.downloadingUrl}
+                                                download={record.id}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                <Button size="small" icon={<FileOutlined/>}/>
+                                            </a>
+                                        </>
+                                    )}
                                     {permissionsData?.includes(Roles.ADMIN) && (
                                         <DeleteButton
                                             onSuccess={() => refetch()}
