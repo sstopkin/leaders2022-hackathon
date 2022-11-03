@@ -29,13 +29,39 @@ import {API_ROOT, DATE_FORMAT} from "../../constants";
 import FileOutlined from "@ant-design/icons/lib/icons/FileOutlined";
 import React from "react";
 import {Roles} from "interfaces/roles";
-import { ResearchProcessingStatus } from "components";
+import {ResearchProcessingStatus} from "components";
+import Truncate from "react-truncate";
+import axios from "axios";
+import * as zip from "@zip.js/zip.js";
 
 const {Title} = Typography;
+
+const model = (() => {
+    let zipWriter: any;
+    return {
+        addFile(file: any, options?: any) {
+            if (!zipWriter) {
+                zipWriter = new zip.ZipWriter(new zip.BlobWriter("application/zip"), {bufferedWrite: true});
+            }
+            return zipWriter.add(file.name, new zip.BlobReader(file), options);
+        },
+        async getBlobURL() {
+            if (zipWriter) {
+                const blobURL = URL.createObjectURL(await zipWriter.close());
+                zipWriter = null;
+                return blobURL;
+            } else {
+                throw new Error("Zip file closed");
+            }
+        }
+    };
+})();
 
 export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
     const navigate = useNavigation();
+
+    const [isUploading, setUploading] = React.useState(false);
 
     const {data: permissionsData} = usePermissions();
 
@@ -61,21 +87,54 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
 
     const files = researchDicoms?.data || [];
 
+    const uploadResearchFiles = async () => {
+        setUploading(true);
+        const filesBlob = await Promise.all(files.map(async file => {
+            const response = await axios.get(file.downloadingUrl, {
+                responseType: 'blob'
+            });
+            return new File([response.data], file.name)
+        }));
+
+        await Promise.all(filesBlob.map(async file => {
+            return await model.addFile(file);
+        }));
+
+        const blobUrl = await model.getBlobURL();
+
+        const anchor = document.createElement("a");
+        anchor.href = blobUrl;
+        anchor.download = record?.name || 'research'
+        anchor.click();
+        anchor.remove();
+        setUploading(false);
+    }
+
     return (
         <>
             <Show
                 isLoading={isLoading}
                 canEdit={permissionsData?.includes(Roles.ADMIN)}
-                headerButtons={({ defaultButtons }) => (
+                headerButtons={({defaultButtons}) => (
                     <>
                         {defaultButtons}
+                        <Button
+                            loading={isUploading}
+                            disabled={isUploading}
+                            onClick={uploadResearchFiles}
+                            type="primary"
+                            icon={<Icons.UploadOutlined/>}
+                        >
+                            Загрузить исследование
+                        </Button>
                         <Button
                             type="primary"
                             onClick={() => navigate.push(`/dicom/show?researchId=${record?.id}`)}
                             icon={<Icons.EditOutlined/>}>
                             Разметить исследование
                         </Button>
-                        <Button type="primary" onClick={() => navigate.push(`/dicom/create?researchId=${record?.id}`)} icon={<Icons.PlusOutlined/>}>Добавить файл</Button>
+                        <Button type="primary" onClick={() => navigate.push(`/dicom/create?researchId=${record?.id}`)}
+                                icon={<Icons.PlusOutlined/>}>Добавить файл(ы)</Button>
                     </>
                 )}
             >
@@ -97,12 +156,12 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                         </Typography.Text>
 
                         {(record?.parentResearchId) && (
-                        <>
-                            <Title level={5}>{t("researches.fields.createdBy")}</Title>
-                            <Typography.Text>
-                                <UrlField value={record?.parentResearchId} />
-                            </Typography.Text>
-                        </>
+                            <>
+                                <Title level={5}>{t("researches.fields.createdBy")}</Title>
+                                <Typography.Text>
+                                    <UrlField value={record?.parentResearchId}/>
+                                </Typography.Text>
+                            </>
                         )}
                         <Title level={5}>{t("researches.fields.description")}</Title>
                         <Typography.Text>
@@ -113,7 +172,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                         <Title level={5}>{t("researches.fields.files")}</Title>
                         <Table
                             pagination={{
-                              showSizeChanger: true,
+                                showSizeChanger: true,
                             }}
                             dataSource={files}
                         >
@@ -121,7 +180,9 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                                 dataIndex="name"
                                 key="name"
                                 title={t("dicoms.fields.name")}
-                                // render={(value) => <div>{((value.length > 25) ? `${value.substring(1, 25)}${value.substring(26, value.length)}` : value )}</div> }
+                                render={(value) => <Truncate width={210}
+                                                             lines={1}>{value}</Truncate>
+                                }
                             />
                             <Table.Column
                                 dataIndex="createdAt"
