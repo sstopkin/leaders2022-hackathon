@@ -30,6 +30,14 @@ export interface IResearch {
     parentResearchId: string;
 }
 
+export interface IResearchFilterVariables {
+    name?: string;
+    // store?: string;
+    // user?: string;
+    createdAt?: [Dayjs, Dayjs];
+    status?: string;
+  }
+
 export interface IDicom {
     id: string;
     downloadingUrl: string;

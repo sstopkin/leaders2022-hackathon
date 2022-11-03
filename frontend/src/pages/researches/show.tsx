@@ -48,7 +48,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
         id: (record?.createdByUserId as any) ?? "",
     });
 
-    const {data: projectDicoms, refetch} = useCustom<Array<IDicom>>({
+    const {data: researchDicoms, refetch} = useCustom<Array<IDicom>>({
         url: `${API_ROOT}/dicoms`,
         method: "get",
         config: {
@@ -59,7 +59,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
     });
 
 
-    const files = projectDicoms?.data || [];
+    const files = researchDicoms?.data || [];
 
     return (
         <>
@@ -121,6 +121,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                                 dataIndex="name"
                                 key="name"
                                 title={t("dicoms.fields.name")}
+                                // render={(value) => <div>{((value.length > 25) ? `${value.substring(1, 25)}${value.substring(26, value.length)}` : value )}</div> }
                             />
                             <Table.Column
                                 dataIndex="createdAt"
