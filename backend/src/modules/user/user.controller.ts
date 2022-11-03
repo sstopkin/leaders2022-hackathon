@@ -48,7 +48,7 @@ export class UserController {
   }
 
   @Get(':id')
-  @UseGuards(RoleGuard([UserRole.ADMIN]))
+  @UseGuards(RoleGuard([UserRole.ADMIN, UserRole.USER]))
   @ApiOperation({ summary: 'Return a user with specified id' })
   @ApiParam({
     name: 'id',
