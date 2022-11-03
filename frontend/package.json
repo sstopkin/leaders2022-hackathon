@@ -23,7 +23,7 @@
     "dayjs": "^1.11.6",
     "dicom-parser": "^1.8.19",
     "gl-matrix": "^3.4.3",
-    "i18next": "^22.0.2",
+    "i18next": "^22.0.4",
     "i18next-browser-languagedetector": "^6.1.8",
     "i18next-http-backend": "^1.4.4",
     "jwt-decode": "^3.1.2",

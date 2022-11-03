@@ -24,6 +24,9 @@ import {DATE_FORMAT} from "../../constants";
 import { ResearchProcessingStatus } from "components/researchesStatus";
 import { useMemo } from "react";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
+import ruLocale from "antd/es/date-picker/locale/ru_RU"
+import enLocale from "antd/es/date-picker/locale/en_US";
 
 
 export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
@@ -161,7 +164,7 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
 const Filter: React.FC<{ formProps: FormProps; filters: CrudFilters }> = (
     props
   ) => {
-    const t = useTranslate();
+    const {i18n, t} = useTranslation();
   
     const { formProps, filters } = props;
     const { selectProps: researchesSelectProps } = useSelect<IResearch>({
@@ -170,6 +173,17 @@ const Filter: React.FC<{ formProps: FormProps; filters: CrudFilters }> = (
     });
   
     const { RangePicker } = DatePicker;
+
+    const dateLocale = useMemo(() => {
+      switch (i18n.language) {
+          case "ru": {
+              return ruLocale
+          }
+          default: {
+              return enLocale
+          }
+      }
+  }, [i18n.language])
   
     const created_date = useMemo(() => {
       const start = getDefaultFilter("createdAt", filters, "gte");
@@ -240,7 +254,7 @@ const Filter: React.FC<{ formProps: FormProps; filters: CrudFilters }> = (
           </Col>
           <Col xl={24} md={8} sm={12} xs={24}>
             <Form.Item label={t("researches.filter.createdAt")} name="createdAt">
-              <RangePicker style={{ width: "100%" }} />
+              <RangePicker locale={dateLocale} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
           <Col xl={24} md={8} sm={12} xs={24}>
