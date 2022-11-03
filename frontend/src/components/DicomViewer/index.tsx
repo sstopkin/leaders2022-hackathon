@@ -1,13 +1,13 @@
 import React, {ChangeEvent} from "react";
 import * as cornerstone from "@cornerstonejs/core";
 import {RenderingEngine} from "@cornerstonejs/core";
-import {Button, Icons, Tooltip} from "@pankod/refine-antd";
+import {Button, Icons, Spin, Tooltip} from "@pankod/refine-antd";
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import {useNotification, useTranslate} from "@pankod/refine-core";
 import * as cornerstoneTools from "@cornerstonejs/tools";
 import {ViewportType} from "@cornerstonejs/core/dist/esm/enums";
 import {IStackViewport} from "@cornerstonejs/core/dist/esm/types";
-import {Annotation, IToolGroup} from "@cornerstonejs/tools/dist/esm/types";
+import {Annotation} from "@cornerstonejs/tools/dist/esm/types";
 import {MouseBindings} from "@cornerstonejs/tools/dist/esm/enums";
 import dicomParser from "dicom-parser";
 import {DICOM_DICTIONARY, formatDicomValues} from "../../utils";
@@ -19,6 +19,11 @@ import {ReactComponent as WindowLevelIcon} from "../../assets/icons/windowLevel.
 import {ReactComponent as BidirectionalToolIcon} from "../../assets/icons/bidirectionalRuler.svg";
 import {ReactComponent as AngleIcon} from "../../assets/icons/angle.svg";
 import styles from "./DicomViewer.module.css";
+import {MouseWheelEventType} from "@cornerstonejs/tools/dist/esm/types/EventTypes";
+import AnnotationsList from "../AnnotationsList";
+import axiosInstance from "../../setup";
+import {API_ROOT} from "../../constants";
+import {RawMarkup} from "../../interfaces";
 
 const {
     LengthTool,
@@ -51,7 +56,6 @@ const toolsIcons = {
 }
 
 const toolsNames = [
-    StackScrollMouseWheelTool.toolName,
     LengthTool.toolName,
     RectangleROITool.toolName,
     EllipticalROITool.toolName,
@@ -63,25 +67,33 @@ const toolsNames = [
     ZoomTool.toolName,
 ];
 
-cornerstoneTools.addTool(StackScrollMouseWheelTool)
-cornerstoneTools.addTool(LengthTool)
-cornerstoneTools.addTool(PanTool)
-// cornerstoneTools.addTool(WindowLevelTool)
-cornerstoneTools.addTool(ZoomTool)
-cornerstoneTools.addTool(RectangleROITool)
-cornerstoneTools.addTool(EllipticalROITool)
-cornerstoneTools.addTool(BidirectionalTool)
-cornerstoneTools.addTool(AngleTool)
-cornerstoneTools.addTool(PlanarFreehandROITool)
-
 interface DicomViewerProps {
-    dicomFiles: Array<File>
+    dicomFiles: Array<File>,
+    currentUserName: string,
+    currentUserId: string,
+    currentResearchId: string,
+    markup?: null | RawMarkup
 }
 
-const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
-    const t = useTranslate();
-    const notification = useNotification();
+interface AnnotationsState {
+    [userId: string]: {
+        username: string
+        info: Array<{
+            uuid: string,
+            toolName: string,
+            imageIdx: number,
+            isVisible: boolean,
+        }>
+    }
+}
 
+const DicomViewer: React.FC<DicomViewerProps> = ({
+                                                     dicomFiles,
+                                                     currentUserId,
+                                                     currentResearchId,
+                                                     currentUserName,
+                                                     markup
+                                                 }) => {
     const CustomLevel = React.useRef(class CustomLevel extends WindowLevelTool {
         getNewRange({
                         viewport,
@@ -95,42 +107,134 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
         }
     })
 
+    const CustomStackWheel = React.useRef(class CustomStackWheel extends StackScrollMouseWheelTool {
+        mouseWheelCallback(evt: MouseWheelEventType) {
+            super.mouseWheelCallback(evt);
+            const viewport = viewportRef.current;
+            if (viewport) {
+                const untypedViewport = viewport as any;
+                const fileIndex = untypedViewport.getTargetImageIdIndex();
+                if (fileIndex !== undefined) {
+                    setCurrentImageIndex(fileIndex);
+                    parseDicomFile(dicomFiles[fileIndex]);
+                }
+            }
+        }
+    })
+
+    const t = useTranslate();
+    const notification = useNotification();
+
     const imageZoneRef = React.useRef<null | HTMLDivElement>(null)
     const hiddenImportAnnotationInputRef = React.useRef<null | HTMLInputElement>(null)
-    const toolGroupRef = React.useRef<IToolGroup | undefined>(undefined)
+    const toolGroupRef = React.useRef(ToolGroupManager)
     const renderingEngineRef = React.useRef<RenderingEngine | null>(null)
     const viewportRef = React.useRef<IStackViewport | null>(null)
 
     const [fileLoaded, setFileLoaded] = React.useState<boolean>(false);
     const [activeTool, setActiveTool] = React.useState<undefined | string>(undefined);
     const [dicomInfo, setDicomInfo] = React.useState<undefined | { [key: string]: string }>(undefined);
-    const [annotationsState, setAnnotationsState] = React.useState<Array<{
-        uuid: string,
-        toolName: string,
-        isVisible: boolean
-    }>>([]);
+    const [annotationsState, setAnnotationsState] = React.useState<AnnotationsState>({
+        [currentUserId]: {
+            info: [],
+            username: currentUserName
+        }
+    });
+    const [isStateSaving, setStateSaving] = React.useState<boolean>(false);
+    const [currentImageIndex, setCurrentImageIndex] = React.useState<number>(0);
     const [voiRange, setVoiRange] = React.useState<undefined | { upper: number, lower: number }>(undefined)
 
     React.useEffect(() => {
-        cornerstoneTools.addTool(CustomLevel.current);
+        let ignore = false;
+        cornerstoneTools.addTool(LengthTool)
+        cornerstoneTools.addTool(PanTool)
+        cornerstoneTools.addTool(ZoomTool)
+        cornerstoneTools.addTool(RectangleROITool)
+        cornerstoneTools.addTool(EllipticalROITool)
+        cornerstoneTools.addTool(BidirectionalTool)
+        cornerstoneTools.addTool(AngleTool)
+        cornerstoneTools.addTool(PlanarFreehandROITool)
         return () => {
-            ToolGroupManager.destroyToolGroup(toolGroupId);
+            if (!ignore) {
+                cornerstoneTools.removeTool(LengthTool)
+                cornerstoneTools.removeTool(PanTool)
+                cornerstoneTools.removeTool(ZoomTool)
+                cornerstoneTools.removeTool(RectangleROITool)
+                cornerstoneTools.removeTool(EllipticalROITool)
+                cornerstoneTools.removeTool(BidirectionalTool)
+                cornerstoneTools.removeTool(AngleTool)
+                cornerstoneTools.removeTool(PlanarFreehandROITool)
+                ignore = true;
+            }
         }
     }, [])
 
     React.useEffect(() => {
-        const displayDicomFile = async () => {
-            if (dicomFiles && dicomFiles.length > 0) {
-                parseDicomFile(dicomFiles[0]);
-                const imageIds = dicomFiles.map(file => cornerstoneWADOImageLoader.wadouri.fileManager.add(file));
+        const element = imageZoneRef.current;
+        const CustomWheelTool = CustomStackWheel.current
+        const CustomLevelTool = CustomLevel.current
+        let ignore = false;
+        if (!ignore) {
+            cornerstoneTools.addTool(CustomWheelTool)
+            cornerstoneTools.addTool(CustomLevelTool);
+            parseDicomFile(dicomFiles[0]);
 
-                if (imageZoneRef.current) {
-                    await initializeCornerstone(imageIds, imageZoneRef.current)
+            const displayDicomFile = async () => {
+                if (dicomFiles && dicomFiles.length > 0) {
+                    const imageIds: Array<string> = [];
+                    const annotations: Array<Annotation> = [];
+                    const newAnnotationsState: AnnotationsState = {}
+
+                    dicomFiles.forEach(file => {
+                        imageIds.push(cornerstoneWADOImageLoader.wadouri.fileManager.add(file))
+                    })
+
+                    if (element) {
+                        await initializeCornerstone(imageIds, element)
+                        if (viewportRef.current) {
+                            cornerstoneTools.annotation.state.removeAllAnnotations(element)
+
+                            if (markup) {
+                                const userIds = Object.keys(markup);
+                                userIds.forEach((userId) => {
+                                    annotations.push(...markup[userId].markup);
+
+                                    newAnnotationsState[userId] = {
+                                        username: markup[userId].username,
+                                        info: markup[userId].markup.map(annotation => {
+                                            const imageIdx = annotation.metadata.referencedImageId?.split(":")[1];
+                                            return {
+                                                uuid: annotation.annotationUID || "-1",
+                                                toolName: annotation.metadata.toolName,
+                                                isVisible: userId === currentUserId,
+                                                imageIdx: imageIdx ? Number.parseInt(imageIdx) : 0
+                                            }
+                                        })
+                                    }
+                                });
+                            }
+
+                            if (annotations.length > 0) {
+                                annotations.forEach(annotation => {
+                                    cornerstoneTools.annotation.state.addAnnotation(element, annotation)
+                                });
+                                setAnnotationsState(newAnnotationsState);
+                            }
+                        }
+                    }
                 }
             }
+            displayDicomFile()
         }
-        displayDicomFile()
-    }, [dicomFiles])
+
+        return () => {
+            cornerstoneTools.removeTool(CustomLevelTool);
+            cornerstoneTools.removeTool(CustomWheelTool);
+            cornerstoneWADOImageLoader.wadouri.fileManager.purge();
+            cornerstoneTools.ToolGroupManager.destroy();
+            ignore = true
+        }
+    }, [dicomFiles, currentUserId, markup])
 
     const handleImportClick = () => {
         if (hiddenImportAnnotationInputRef.current) {
@@ -138,16 +242,27 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
         }
     }
 
-    const getActiveAnnotationsState: () => Array<Annotation> = () => {
-        return annotationsState.map(annotation => cornerstoneTools.annotation.state.getAnnotation(annotation.uuid));
+    const getActiveAnnotationsState: () => { [userId: string]: { username: string, markup: Array<Annotation> } } = () => {
+        const state: { [userId: string]: { username: string, markup: Array<Annotation> } } = {};
+
+        const userIds = Object.keys(annotationsState);
+
+        userIds.forEach(userId => {
+            state[userId] = {
+                username: annotationsState[userId].username,
+                markup: annotationsState[currentUserId].info.map(annotation => cornerstoneTools.annotation.state.getAnnotation(annotation.uuid))
+            }
+        })
+
+        return state
     }
 
     const exportAnnotationStateToJSON = () => {
         const currentAnnotationState = getActiveAnnotationsState();
         const a = document.createElement("a");
-        const file = new Blob([JSON.stringify({data: currentAnnotationState})], {type: "application/json"});
+        const file = new Blob([JSON.stringify(currentAnnotationState)], {type: "application/json"});
         a.href = URL.createObjectURL(file);
-        a.download = `Export-${Date.now()}`;
+        a.download = `Markup-${currentUserId}-${Date.now()}`;
         a.click();
         URL.revokeObjectURL(a.href);
         notification.open?.({
@@ -158,41 +273,78 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
         })
     }
 
-    const saveAnnotationState = () => {
-        const currentAnnotationState = getActiveAnnotationsState();
-        console.log(currentAnnotationState);
-        notification.open?.({
-            type: 'success',
-            message: t("dicom.annotations.notifications.save.title"),
-            description: t("dicom.annotations.notifications.save.description"),
-            key: Date.now().toString()
-        })
-    }
+    const saveAnnotationState = async () => {
+        setStateSaving(true);
+        try {
+            const currentAnnotationState = getActiveAnnotationsState();
 
-    const importAnnotationsState = (newState: { data: Array<Annotation> }) => {
-        if (imageZoneRef.current) {
-            const element = imageZoneRef.current;
-            cornerstoneTools.annotation.state.removeAllAnnotations(element);
-            const formattedAnnotationsInfo = newState.data.map(annotation => {
-                cornerstoneTools.annotation.state.addAnnotation(element, annotation)
-                return {
-                    uuid: annotation.annotationUID || "",
-                    toolName: annotation.metadata.toolName,
-                    isVisible: true
+            await axiosInstance.patch(`${API_ROOT}/researches/${currentResearchId}`, JSON.stringify({markup: currentAnnotationState}), {
+                headers: {
+                    "Content-Type": "application/json"
                 }
             });
-            setAnnotationsState(formattedAnnotationsInfo);
-
-            if (viewportRef.current) {
-                viewportRef.current.render();
-            }
 
             notification.open?.({
                 type: 'success',
-                message: t("dicom.annotations.notifications.import.title"),
-                description: t("dicom.annotations.notifications.import.description"),
+                message: t("dicom.annotations.notifications.save.title"),
+                description: t("dicom.annotations.notifications.save.description"),
                 key: Date.now().toString()
             })
+        } catch (err) {
+            notification.open?.({
+                type: 'error',
+                message: t("dicom.annotations.notifications.saveError.title"),
+                description: t("dicom.annotations.notifications.saveError.description"),
+                key: Date.now().toString()
+            })
+        } finally {
+            setStateSaving(false);
+        }
+    }
+
+    const importAnnotationsState = (importedState: { [userId: string]: { username: string, markup: Array<Annotation> } }) => {
+        if (imageZoneRef.current) {
+            try {
+                const newState: AnnotationsState = {};
+
+                const element = imageZoneRef.current;
+                cornerstoneTools.annotation.state.removeAllAnnotations(element);
+
+                const userIds = Object.keys(importedState);
+
+                userIds.forEach(userId => {
+                    newState[userId] = {
+                        username: importedState[userId].username,
+                        info: importedState[userId].markup.map(annotation => {
+                            cornerstoneTools.annotation.state.addAnnotation(element, annotation)
+                            //Грязный хак, мы всегда считаем, что imageId формата "dicom:{number}"
+                            const imageIdx = annotation.metadata.referencedImageId?.split(":")[1];
+                            return {
+                                uuid: annotation.annotationUID || "",
+                                toolName: annotation.metadata.toolName,
+                                isVisible: true,
+                                imageIdx: imageIdx ? Number.parseInt(imageIdx) : 0
+                            }
+                        })
+                    }
+                });
+
+                setAnnotationsState(newState);
+
+                if (viewportRef.current) {
+                    viewportRef.current.render();
+                }
+
+                notification.open?.({
+                    type: 'success',
+                    message: t("dicom.annotations.notifications.import.title"),
+                    description: t("dicom.annotations.notifications.import.description"),
+                    key: Date.now().toString()
+                })
+            } catch (e) {
+                console.log(e);
+                console.error('ERROR')
+            }
         }
     }
 
@@ -202,32 +354,73 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
             const currentAnnotationToolState = cornerstoneTools.annotation.state.getAnnotations(element, activeTool);
             if (currentAnnotationToolState) {
                 const lastStateItem = currentAnnotationToolState[currentAnnotationToolState.length - 1];
-                if (!annotationsState.find(annotation => annotation.uuid === lastStateItem.annotationUID)) {
+
+                if (!annotationsState[currentUserId].info.find(annotation => annotation.uuid === lastStateItem.annotationUID)) {
                     const convertedStateItem = {
                         uuid: lastStateItem.annotationUID || "",
                         toolName: lastStateItem.metadata.toolName,
-                        isVisible: true
+                        isVisible: true,
+                        username: 'Вы',
+                        imageIdx: currentImageIndex
                     }
-                    setAnnotationsState([convertedStateItem, ...annotationsState]);
+                    setAnnotationsState({
+                        ...annotationsState,
+                        [currentUserId]: {
+                            ...annotationsState[currentUserId],
+                            info: [convertedStateItem, ...annotationsState[currentUserId].info]
+                        }
+                    });
                 }
             }
         }
     }
 
-    const toggleAnnotationVisibility = (uuid: string) => {
-        const annotationIndex = annotationsState.findIndex(annotation => annotation.uuid === uuid);
+    const toggleGroupAnnotationsVisibility = (userId: string, status: boolean) => {
+        const annotationsUuids = annotationsState[userId].info.map(annotation => annotation.uuid);
+        annotationsUuids.forEach(uuid => {
+            cornerstoneTools.annotation.visibility.setAnnotationVisibility(uuid, status);
+        })
+        const newAnnotationsInfo = annotationsState[userId].info.map(infoObj => ({
+            ...infoObj,
+            isVisible: status
+        }));
+        setAnnotationsState({
+            ...annotationsState,
+            [userId]: {...annotationsState[userId], info: [...newAnnotationsInfo]}
+        })
+        if (viewportRef.current) {
+            viewportRef.current.render();
+        }
+    }
+
+    const groupAnnotationsDelete = (userId: string) => {
+        const annotationsUuids = annotationsState[userId].info.map(annotation => annotation.uuid);
+        annotationsUuids.forEach(uuid => {
+            cornerstoneTools.annotation.state.removeAnnotation(uuid);
+        })
+        setAnnotationsState({...annotationsState, [userId]: {...annotationsState[userId], info: []}})
+        if (viewportRef.current) {
+            viewportRef.current.render();
+        }
+    }
+
+    const toggleAnnotationVisibility = (uuid: string, userId: string) => {
+        const annotationIndex = annotationsState[userId].info.findIndex(annotation => annotation.uuid === uuid);
 
         if (annotationIndex !== -1) {
-            const annotationObject = annotationsState[annotationIndex];
+            const annotationObject = annotationsState[userId].info[annotationIndex];
             const visibleStatus = annotationObject.isVisible;
             cornerstoneTools.annotation.visibility.setAnnotationVisibility(annotationObject.uuid, !visibleStatus)
             const newAnnotationStatus = {
                 ...annotationObject,
                 isVisible: !annotationObject.isVisible
             }
-            const currentState = annotationsState
+            const currentState = annotationsState[userId].info;
             currentState.splice(annotationIndex, 1, newAnnotationStatus);
-            setAnnotationsState([...currentState]);
+            setAnnotationsState({
+                ...annotationsState,
+                [userId]: {...annotationsState[userId], info: [...currentState]}
+            });
 
             if (viewportRef.current) {
                 viewportRef.current.render();
@@ -236,12 +429,15 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
     }
 
     const deleteAnnotation = (uuid: string) => {
-        const annotationIndex = annotationsState.findIndex(annotation => annotation.uuid === uuid);
+        const annotationIndex = annotationsState[currentUserId].info.findIndex(annotation => annotation.uuid === uuid);
 
         if (annotationIndex !== -1) {
             cornerstoneTools.annotation.state.removeAnnotation(uuid)
-            const currentState = annotationsState.filter(annotation => annotation.uuid !== uuid);
-            setAnnotationsState(currentState);
+            const currentState = annotationsState[currentUserId].info.filter(annotation => annotation.uuid !== uuid);
+            setAnnotationsState({
+                ...annotationsState,
+                [currentUserId]: {...annotationsState[currentUserId], info: currentState}
+            });
 
             if (viewportRef.current) {
                 viewportRef.current.render();
@@ -251,18 +447,28 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
 
     const handleToolButton = (toolName: string) => {
         const previousTool = activeTool;
+        const canvas = viewportRef.current?.getCanvas();
+
+        if (canvas) {
+            if (toolName === PlanarFreehandROITool.toolName) {
+                canvas.style.cursor = 'crosshair';
+            } else {
+                canvas.style.cursor = '';
+            }
+        }
+
         if (previousTool === toolName) {
             setActiveTool(undefined);
-            toolGroupRef.current?.setToolPassive(previousTool);
+            toolGroupRef.current.getToolGroup(toolGroupId)?.setToolPassive(previousTool);
         } else {
             setActiveTool(toolName);
-            toolGroupRef.current?.setToolActive(toolName, {
+            toolGroupRef.current.getToolGroup(toolGroupId)?.setToolActive(toolName, {
                 bindings: [{
                     mouseButton: MouseBindings.Primary
                 }]
             });
             if (previousTool) {
-                toolGroupRef.current?.setToolPassive(previousTool);
+                toolGroupRef.current.getToolGroup(toolGroupId)?.setToolPassive(previousTool);
             }
         }
     }
@@ -311,18 +517,16 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
     }
 
     const initializeCornerstone = async (imageIds: Array<string>, element: HTMLDivElement) => {
-        toolGroupRef.current = ToolGroupManager.createToolGroup(toolGroupId);
+        toolGroupRef.current.createToolGroup(toolGroupId);
         renderingEngineRef.current = new cornerstone.RenderingEngine(renderingEngineId);
 
         if (toolGroupRef.current) {
             toolsNames.forEach((toolName) => {
-                toolGroupRef.current?.addTool(toolName);
-                if (toolName !== StackScrollMouseWheelTool.toolName) {
-                    toolGroupRef.current?.setToolPassive(toolName);
-                } else {
-                    toolGroupRef.current?.setToolActive(toolName);
-                }
+                toolGroupRef.current.getToolGroup(toolGroupId)?.addTool(toolName);
+                toolGroupRef.current.getToolGroup(toolGroupId)?.setToolPassive(toolName);
             })
+            toolGroupRef.current.getToolGroup(toolGroupId)?.addTool(CustomStackWheel.current.toolName);
+            toolGroupRef.current.getToolGroup(toolGroupId)?.setToolActive(CustomStackWheel.current.toolName);
         }
 
         const viewportInput = {
@@ -331,7 +535,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
             element
         }
 
-        toolGroupRef.current?.addViewport(viewportId, renderingEngineId)
+        toolGroupRef.current.getToolGroup(toolGroupId)?.addViewport(viewportId, renderingEngineId)
 
         renderingEngineRef.current.enableElement(viewportInput);
 
@@ -370,11 +574,14 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
         <div className={styles.mainContainer}>
             <div className={styles.leftSidePanel}>
                 <div className={styles.dicomInfoBlock}>
-                    <h3>{t("dicom.info.title")}</h3>
+                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                        <h3>{t("dicom.info.title")}</h3>
+                        <h3>{currentImageIndex + 1}/{dicomFiles.length}</h3>
+                    </div>
                     <ul className={styles.dicomInfoList}>
-                        {Object.keys(dicomInfo || {}).map(info => <li
+                        {Object.keys(dicomInfo || {}).map((info, index) => <li
                             className={styles.dicomInfoListItem}
-                            key={info}>
+                            key={index}>
                             <h4>{t(`dicom.info.${info}`)}:</h4>
                             <span>{formatDicomValues(dicomInfo?.[info], info)}</span>
                         </li>)}</ul>
@@ -398,43 +605,14 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
                             <Button onClick={handleImportClick} disabled={!fileLoaded} icon={<Icons.ImportOutlined/>}/>
                         </Tooltip>
                     </div>
-                    <ul className={styles.annotationsInfoList}>
-                        {annotationsState.map((annotation) => <li
-                                key={annotation.uuid}
-                                className={styles.annotationsInfoListItem}>
-                                <div>
-                                    <span>{t(`dicom.annotations.tool.${annotation.toolName}`)}</span>
-                                </div>
-                                <div>
-                                    <Tooltip
-                                        placement="top"
-                                        color="green"
-                                        title={annotation.isVisible ? t("dicom.annotations.tool.Hide") : t("dicom.annotations.tool.Show")}
-                                    >
-                                        <Button
-                                            style={{marginRight: '8px'}}
-                                            type={annotation.isVisible ? "primary" : 'default'}
-                                            icon={annotation.isVisible ? <Icons.EyeOutlined/> :
-                                                <Icons.EyeInvisibleOutlined/>}
-                                            onClick={() => toggleAnnotationVisibility(annotation.uuid)}
-                                        />
-                                    </Tooltip>
-                                    <Tooltip
-                                        placement="top"
-                                        color="green"
-                                        title={t("dicom.annotations.tool.Delete")}
-                                    >
-                                        <Button
-                                            type="primary"
-                                            icon={<Icons.CloseOutlined/>}
-                                            danger
-                                            onClick={() => deleteAnnotation(annotation.uuid)}
-                                        />
-                                    </Tooltip>
-                                </div>
-                            </li>
-                        )}
-                    </ul>
+                    <AnnotationsList
+                        currentUserId={currentUserId}
+                        annotations={annotationsState}
+                        handleVisibility={toggleAnnotationVisibility}
+                        handleDelete={deleteAnnotation}
+                        handleGroupVisibility={toggleGroupAnnotationsVisibility}
+                        handleGroupDelete={groupAnnotationsDelete}
+                    />
                 </div>
             </div>
             <div
@@ -453,9 +631,11 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
             <div className={styles.rightSidePanel}>
                 <div>
                     {toolsNames.filter(toolName => toolName !== StackScrollMouseWheelTool.toolName).map(toolName =>
-                        <Tooltip placement="left"
-                                 color="green"
-                                 title={t(`dicom.annotations.tool.${toolName}`)}>
+                        <Tooltip
+                            key={toolName}
+                            placement="left"
+                            color="green"
+                            title={t(`dicom.annotations.tool.${toolName}`)}>
                             <Button
                                 style={{
                                     marginBottom: toolName === PlanarFreehandROITool.toolName ? '32px' : '8px',
@@ -464,8 +644,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
                                     alignItems: 'center'
                                 }}
                                 size="large"
-                                disabled={!fileLoaded}
-                                key={toolName}
+                                disabled={!fileLoaded || isStateSaving}
                                 type={getButtonType(toolName)}
                                 icon={toolsIcons[toolName]}
                                 onClick={() => handleToolButton(toolName)}/>
@@ -476,7 +655,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
                         title={t("dicom.annotations.tool.Rotate")}
                     >
                         <Button
-                            disabled={!fileLoaded}
+                            disabled={!fileLoaded || isStateSaving}
                             size="large"
                             onClick={handleRotate}
                             icon={<Icons.RotateRightOutlined/>}
@@ -489,7 +668,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
                         color="green"
                         title={t("dicom.annotations.tool.Export")}
                     >
-                        <Button style={{marginBottom: '8px'}} disabled={!fileLoaded} size="large"
+                        <Button style={{marginBottom: '8px'}} disabled={!fileLoaded || isStateSaving} size="large"
                                 icon={<Icons.ExportOutlined/>}
                                 onClick={exportAnnotationStateToJSON}/>
                     </Tooltip>
@@ -498,7 +677,8 @@ const DicomViewer: React.FC<DicomViewerProps> = ({dicomFiles}) => {
                         color="green"
                         title={t("dicom.annotations.tool.Save")}
                     >
-                        <Button disabled={!fileLoaded} size="large" icon={<Icons.SaveOutlined/>}
+                        <Button disabled={!fileLoaded || isStateSaving} size="large"
+                                icon={isStateSaving ? <Spin/> : <Icons.SaveOutlined/>}
                                 onClick={saveAnnotationState}/>
                     </Tooltip>
                 </div>

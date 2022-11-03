@@ -1,0 +1,31 @@
+.list {
+    list-style: none;
+    padding: 12px;
+    margin: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    height: 0;
+    background-color: white;
+}
+
+.listItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    border: 1px solid #D9D9D9;
+    border-radius: 4px;
+    padding: 4px 4px 4px 8px;
+}
+
+.listTitleButtonsContainer > * {
+    margin-left: 8px;
+}
+
+.listTitleButtonsContainer > *:first-child {
+    margin-left: 0;
+}
+
+.listTitleButtonsContainer > *:last-child {
+    margin-left: 16px;
+}
