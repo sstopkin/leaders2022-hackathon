@@ -1,3 +1,5 @@
+import {Annotation} from "@cornerstonejs/tools/dist/esm/types";
+
 export interface ICategory {
     id: string;
     title: string;
@@ -30,6 +32,7 @@ export interface IResearch {
     dicoms: Array<IDicom>
     parentResearchId: string;
     assigneeUserId: string;
+    markup: null | RawMarkup;
 }
 
 export interface IResearchFilterVariables {
@@ -45,4 +48,18 @@ export interface IDicom {
     name: string;
     createdAt: string;
     isUploaded: boolean;
+}
+
+export interface RawMarkup {
+    [userId: string]: {username: string, markup: Array<Annotation>}
+}
+
+export interface IMarkup {
+    [userId: string]: {
+        userInfo: {
+            firstName: string,
+            lastName: string
+        },
+        annotations: Array<Annotation>
+    }
 }
