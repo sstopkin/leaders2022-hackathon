@@ -1,12 +1,12 @@
 import React, {ChangeEvent} from "react";
 import * as cornerstone from "@cornerstonejs/core";
 import {RenderingEngine} from "@cornerstonejs/core";
-import {Button, Icons, Spin, Tooltip} from "@pankod/refine-antd";
+import {Button, Icons, Spin, Tooltip, Select} from "@pankod/refine-antd";
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import {useNotification, useTranslate} from "@pankod/refine-core";
 import * as cornerstoneTools from "@cornerstonejs/tools";
 import {ViewportType} from "@cornerstonejs/core/dist/esm/enums";
-import {IStackViewport} from "@cornerstonejs/core/dist/esm/types";
+import {IStackViewport, VOIRange} from "@cornerstonejs/core/dist/esm/types";
 import {Annotation} from "@cornerstonejs/tools/dist/esm/types";
 import {MouseBindings} from "@cornerstonejs/tools/dist/esm/enums";
 import dicomParser from "dicom-parser";
@@ -26,6 +26,7 @@ import {API_ROOT} from "../../constants";
 import {RawMarkup} from "../../interfaces";
 
 const {
+    MagnifyTool,
     LengthTool,
     RectangleROITool,
     EllipticalROITool,
@@ -33,7 +34,6 @@ const {
     AngleTool,
     PanTool,
     WindowLevelTool,
-    ZoomTool,
     PlanarFreehandROITool,
     ToolGroupManager,
     StackScrollMouseWheelTool
@@ -52,7 +52,7 @@ const toolsIcons = {
     [PlanarFreehandROITool.toolName]: <PencilIcon/>,
     [PanTool.toolName]: <Icons.DragOutlined/>,
     [WindowLevelTool.toolName]: <WindowLevelIcon/>,
-    [ZoomTool.toolName]: <Icons.SearchOutlined/>
+    [MagnifyTool.toolName]: <Icons.SearchOutlined/>
 }
 
 const toolsNames = [
@@ -64,7 +64,7 @@ const toolsNames = [
     PlanarFreehandROITool.toolName,
     PanTool.toolName,
     WindowLevelTool.toolName,
-    ZoomTool.toolName,
+    MagnifyTool.toolName,
 ];
 
 interface DicomViewerProps {
@@ -84,6 +84,62 @@ interface AnnotationsState {
             imageIdx: number,
             isVisible: boolean,
         }>
+    }
+}
+
+type VoiModes =
+    'BRAIN'
+    | 'SUBDURAL'
+    | 'TEMPORAL_BONES'
+    | 'HEAD_SOFT_TISSUES'
+    | 'LUNGS'
+    | 'ABDOMEN_SOFT_TISSUES'
+    | 'LIVER'
+    | 'SPINE_SOFT_TISSUES'
+    | 'SPINE_BONES' | 'DEFAULT';
+
+const VoiModesLabels = ['DEFAULT', 'BRAIN', 'SUBDURAL', 'TEMPORAL_BONES', 'HEAD_SOFT_TISSUES', 'LUNGS', 'ABDOMEN_SOFT_TISSUES', 'LIVER', 'SPINE_SOFT_TISSUES', 'SPINE_BONES']
+
+const VoiModesValues: { [key in VoiModes]: VOIRange } = {
+    DEFAULT: {
+        upper: 0,
+        lower: 0
+    },
+    BRAIN: {
+        upper: 80,
+        lower: 40
+    },
+    SUBDURAL: {
+        upper: 300,
+        lower: 100
+    },
+    TEMPORAL_BONES: {
+        upper: 2800,
+        lower: 600
+    },
+    HEAD_SOFT_TISSUES: {
+        upper: 400,
+        lower: 60
+    },
+    LUNGS: {
+        upper: 1500,
+        lower: 600
+    },
+    ABDOMEN_SOFT_TISSUES: {
+        upper: 400,
+        lower: 50
+    },
+    LIVER: {
+        upper: 150,
+        lower: 30
+    },
+    SPINE_SOFT_TISSUES: {
+        upper: 250,
+        lower: 50
+    },
+    SPINE_BONES: {
+        upper: 1800,
+        lower: 400
     }
 }
 
@@ -130,6 +186,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
     const toolGroupRef = React.useRef(ToolGroupManager)
     const renderingEngineRef = React.useRef<RenderingEngine | null>(null)
     const viewportRef = React.useRef<IStackViewport | null>(null)
+    const defaultVOIRef = React.useRef<undefined | VOIRange>(undefined);
 
     const [fileLoaded, setFileLoaded] = React.useState<boolean>(false);
     const [activeTool, setActiveTool] = React.useState<undefined | string>(undefined);
@@ -142,13 +199,24 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
     });
     const [isStateSaving, setStateSaving] = React.useState<boolean>(false);
     const [currentImageIndex, setCurrentImageIndex] = React.useState<number>(0);
-    const [voiRange, setVoiRange] = React.useState<undefined | { upper: number, lower: number }>(undefined)
+    const [voiRange, setVoiRange] = React.useState<undefined | VOIRange>(undefined);
+    const [voiMode, setVoiMode] = React.useState<VoiModes>('DEFAULT');
+
+    React.useEffect(() => {
+        if (viewportRef.current) {
+            const voiValues = voiMode === 'DEFAULT' ? defaultVOIRef.current : VoiModesValues[voiMode];
+            viewportRef.current.setProperties({voiRange: voiValues});
+            setVoiRange(voiValues);
+
+            viewportRef.current.render();
+        }
+    }, [voiMode])
 
     React.useEffect(() => {
         let ignore = false;
         cornerstoneTools.addTool(LengthTool)
         cornerstoneTools.addTool(PanTool)
-        cornerstoneTools.addTool(ZoomTool)
+        cornerstoneTools.addTool(MagnifyTool)
         cornerstoneTools.addTool(RectangleROITool)
         cornerstoneTools.addTool(EllipticalROITool)
         cornerstoneTools.addTool(BidirectionalTool)
@@ -158,7 +226,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
             if (!ignore) {
                 cornerstoneTools.removeTool(LengthTool)
                 cornerstoneTools.removeTool(PanTool)
-                cornerstoneTools.removeTool(ZoomTool)
+                cornerstoneTools.removeTool(MagnifyTool)
                 cornerstoneTools.removeTool(RectangleROITool)
                 cornerstoneTools.removeTool(EllipticalROITool)
                 cornerstoneTools.removeTool(BidirectionalTool)
@@ -197,7 +265,10 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                             if (markup) {
                                 const userIds = Object.keys(markup);
                                 userIds.forEach((userId) => {
-                                    annotations.push(...markup[userId].markup);
+                                    annotations.push(...markup[userId].markup.map(annotation => ({
+                                        ...annotation,
+                                        isLocked: userId !== currentUserId
+                                    })));
 
                                     newAnnotationsState[userId] = {
                                         username: markup[userId].username,
@@ -206,10 +277,17 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                                             return {
                                                 uuid: annotation.annotationUID || "-1",
                                                 toolName: annotation.metadata.toolName,
-                                                isVisible: userId === currentUserId,
+                                                isVisible: annotation.isVisible === undefined ? false : annotation.isVisible,
                                                 imageIdx: imageIdx ? Number.parseInt(imageIdx) : 0
                                             }
                                         })
+                                    }
+
+                                    if (!userIds.find((userId) => userId === currentUserId)) {
+                                        newAnnotationsState[currentUserId] = {
+                                            username: currentUserName,
+                                            info: []
+                                        }
                                     }
                                 });
                             }
@@ -234,7 +312,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
             cornerstoneTools.ToolGroupManager.destroy();
             ignore = true
         }
-    }, [dicomFiles, currentUserId, markup])
+    }, [dicomFiles, currentUserId, markup, currentUserName])
 
     const handleImportClick = () => {
         if (hiddenImportAnnotationInputRef.current) {
@@ -250,7 +328,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
         userIds.forEach(userId => {
             state[userId] = {
                 username: annotationsState[userId].username,
-                markup: annotationsState[currentUserId].info.map(annotation => cornerstoneTools.annotation.state.getAnnotation(annotation.uuid))
+                markup: annotationsState[userId].info.map(annotation => cornerstoneTools.annotation.state.getAnnotation(annotation.uuid))
             }
         })
 
@@ -316,18 +394,28 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                     newState[userId] = {
                         username: importedState[userId].username,
                         info: importedState[userId].markup.map(annotation => {
-                            cornerstoneTools.annotation.state.addAnnotation(element, annotation)
+                            cornerstoneTools.annotation.state.addAnnotation(element, {
+                                ...annotation,
+                                isLocked: userId !== currentUserId
+                            })
                             //Грязный хак, мы всегда считаем, что imageId формата "dicom:{number}"
                             const imageIdx = annotation.metadata.referencedImageId?.split(":")[1];
                             return {
                                 uuid: annotation.annotationUID || "",
                                 toolName: annotation.metadata.toolName,
-                                isVisible: true,
+                                isVisible: annotation.isVisible === undefined ? false : annotation.isVisible,
                                 imageIdx: imageIdx ? Number.parseInt(imageIdx) : 0
                             }
                         })
                     }
                 });
+
+                if (!userIds.find((userId) => userId === currentUserId)) {
+                    newState[currentUserId] = {
+                        username: currentUserName,
+                        info: []
+                    }
+                }
 
                 setAnnotationsState(newState);
 
@@ -480,16 +568,6 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
         return undefined
     }
 
-
-    const handleRotate = () => {
-        if (viewportRef.current) {
-            const currentProperties = viewportRef.current.getProperties();
-            const currentRotation = currentProperties.rotation;
-            viewportRef.current.setProperties({rotation: (currentRotation || 0) + 90});
-            viewportRef.current.render();
-        }
-    }
-
     const parseDicomFile = (file: File) => {
         const reader = new FileReader();
 
@@ -547,6 +625,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
 
         const viewportProperties = viewportRef.current?.getProperties();
         const currentVoiRange = viewportProperties.voiRange;
+        defaultVOIRef.current = currentVoiRange;
         setVoiRange(currentVoiRange);
 
         viewportRef.current.canvas.oncontextmenu = (event) => event.preventDefault()
@@ -570,9 +649,70 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
         }
     }
 
+    const handleZoomIn = () => {
+        const viewport = renderingEngineRef.current?.getViewport(viewportId) as IStackViewport;
+
+        const {parallelScale} = viewport.getCamera();
+        viewport.setCamera({parallelScale: (parallelScale || 0) - 20})
+        viewportRef.current?.render();
+    }
+
+    const handleZoomOut = () => {
+        const viewport = renderingEngineRef.current?.getViewport(viewportId) as IStackViewport;
+
+        const {parallelScale} = viewport.getCamera();
+        viewport.setCamera({parallelScale: (parallelScale || 0) + 20})
+        viewportRef.current?.render();
+    }
+
+    const handleNextImage = () => {
+        if (viewportRef.current) {
+            const currentImageIdIndex = viewportRef.current.getCurrentImageIdIndex();
+            const numImages = viewportRef.current.getImageIds().length;
+
+            let newImageIdIndex = currentImageIdIndex + 1;
+
+            newImageIdIndex = Math.min(newImageIdIndex, numImages - 1);
+            setCurrentImageIndex(newImageIdIndex);
+
+            viewportRef.current.setImageIdIndex(newImageIdIndex);
+        }
+    }
+
+    const handlePreviousImage = () => {
+        if (viewportRef.current) {
+            const currentImageIdIndex = viewportRef.current.getCurrentImageIdIndex();
+
+            let newImageIdIndex = currentImageIdIndex - 1;
+
+            newImageIdIndex = Math.max(newImageIdIndex, 0);
+            setCurrentImageIndex(newImageIdIndex);
+
+            viewportRef.current.setImageIdIndex(newImageIdIndex);
+        }
+    }
+
+    const handleRotate = () => {
+        const viewport = renderingEngineRef.current?.getViewport(viewportId) as IStackViewport;
+
+        const {rotation} = viewport.getProperties();
+        let currentRotation = rotation || 0;
+        if (currentRotation === 360) {
+            currentRotation = 0;
+        }
+        const newRotation = (currentRotation) + 90;
+        viewport.setProperties({rotation: newRotation})
+        viewportRef.current?.render();
+    }
+
+    const handleModeChange = (value: string) => {
+        const mode = value as VoiModes;
+        setVoiMode(mode);
+    }
+
     return (
         <div className={styles.mainContainer}>
-            <div className={styles.leftSidePanel}>
+            <div className={styles.leftSidePanel} style={{position: 'relative'}}>
                 <div className={styles.dicomInfoBlock}>
                     <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                         <h3>{t("dicom.info.title")}</h3>
@@ -614,6 +754,27 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                         handleGroupDelete={groupAnnotationsDelete}
                     />
                 </div>
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: '100%',
+                    zIndex: 99,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '8px',
+                    backgroundColor: '#D9D9D9'
+                }}>
+                    <h4>Режим просмотра</h4>
+                    <Select
+                        defaultValue={'DEFAULT'}
+                        style={{width: 160}}
+                        options={VoiModesLabels.map(voiMode => ({
+                            value: voiMode,
+                            label: t(`dicom.voiModes.${voiMode}`)
+                        }))}
+                        onChange={handleModeChange}
+                    />
+                </div>
             </div>
             <div
                 onMouseUp={handleAnnotationDraw}
@@ -629,9 +790,10 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                     }}>WW {voiRange.upper.toFixed(3)} / WL {voiRange.lower.toFixed(3)}</div>}
             </div>
             <div className={styles.rightSidePanel}>
-                <div>
+                <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: "space-around"}}>
                     {toolsNames.filter(toolName => toolName !== StackScrollMouseWheelTool.toolName).map(toolName =>
                         <Tooltip
+                            style={{flexBasis: '50%'}}
                             key={toolName}
                             placement="left"
                             color="green"
@@ -662,7 +824,63 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                         />
                     </Tooltip>
                 </div>
-                <div style={{marginTop: 'auto', display: 'flex', flexDirection: 'column'}}>
+                <div style={{display: 'flex', justifyContent: 'space-around', marginTop: '36px'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-around', flexDirection: 'column'}}>
+                        <Tooltip
+                            placement="left"
+                            color="green"
+                            title={t("dicom.annotations.tool.ZoomIn")}
+                        >
+                            <Button
+                                disabled={!fileLoaded || isStateSaving}
+                                size="large"
+                                onClick={handleZoomIn}
+                                icon={<Icons.ZoomInOutlined/>}
+                            />
+                        </Tooltip>
+                        <Tooltip
+                            placement="left"
+                            color="green"
+                            title={t("dicom.annotations.tool.ZoomOut")}
+                        >
+                            <Button
+                                style={{marginTop: '8px'}}
+                                disabled={!fileLoaded || isStateSaving}
+                                size="large"
+                                onClick={handleZoomOut}
+                                icon={<Icons.ZoomOutOutlined/>}
+                            />
+                        </Tooltip>
+                    </div>
+                    <div style={{display: 'flex', justifyContent: 'space-around', flexDirection: 'column'}}>
+                        <Tooltip
+                            placement="left"
+                            color="green"
+                            title={t("dicom.annotations.tool.NextImage")}
+                        >
+                            <Button
+                                disabled={!fileLoaded || isStateSaving || currentImageIndex >= dicomFiles.length - 1}
+                                size="large"
+                                onClick={handleNextImage}
+                                icon={<Icons.CaretUpOutlined/>}
+                            />
+                        </Tooltip>
+                        <Tooltip
+                            placement="left"
+                            color="green"
+                            title={t("dicom.annotations.tool.PreviousImage")}
+                        >
+                            <Button
+                                style={{marginTop: '8px'}}
+                                disabled={!fileLoaded || isStateSaving || currentImageIndex === 0}
+                                size="large"
+                                onClick={handlePreviousImage}
+                                icon={<Icons.CaretDownOutlined/>}
+                            />
+                        </Tooltip>
+                    </div>
+                </div>
+                <div style={{marginTop: 'auto', display: 'flex', justifyContent: 'space-around'}}>
                     <Tooltip
                         placement="left"
                         color="green"

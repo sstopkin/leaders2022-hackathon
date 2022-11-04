@@ -87,10 +87,10 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
         config: {
             query: {
                 researchId: researchRecord?.id,
+                sort: ["name,ASC"]
             },
         },
     });
-
 
     const files = researchDicoms?.data || [];
 

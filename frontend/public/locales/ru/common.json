@@ -101,7 +101,7 @@
         "rightMiddle": "Правая средняя доля",
         "rightDown": "Правая нижняя доля",
         "leftUp": "Левая верхняя доля",
-        "leftDown": "Левая нижняя доля"        
+        "leftDown": "Левая нижняя доля"
       },
       "pathology": "Тип патологии",
       "pathologies": {
@@ -185,6 +185,18 @@
       "instance": "Экземпляр",
       "series": "Серии"
     },
+    "voiModes": {
+      "DEFAULT": "По умолчанию",
+      "BRAIN": "Мозг",
+      "SUBDURAL": "Субдуральный",
+      "TEMPORAL_BONES": "Височные кости",
+      "HEAD_SOFT_TISSUES": "Мягкие ткани головы",
+      "LUNGS": "Лёгкие",
+      "ABDOMEN_SOFT_TISSUES": "Мягкие ткани живота",
+      "LIVER": "Печень",
+      "SPINE_SOFT_TISSUES": "Мягкие ткани позвоночника",
+      "SPINE_BONES": "Кости позвоночника"
+    },
     "annotations": {
       "title": "Аннотации",
       "tool": {
@@ -203,7 +215,12 @@
         "Hide": "Спрятать",
         "Show": "Показать",
         "Delete": "Удалить",
-        "Import": "Импорт"
+        "Import": "Импорт",
+        "ZoomIn": "Увеличить",
+        "ZoomOut": "Уменьшить",
+        "NextImage": "Следующий снимок",
+        "PreviousImage": "Предыдущий снимок",
+        "Magnify": "Экранная лупа"
       },
       "notifications": {
         "export": {

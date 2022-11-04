@@ -34,6 +34,7 @@ export const DicomsList: React.FC = () => {
         config: {
             query: {
                 researchId: researchIdParam,
+                sort: ["name,ASC"]
             },
         },
     });
