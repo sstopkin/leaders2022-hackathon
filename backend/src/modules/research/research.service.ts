@@ -149,6 +149,9 @@ export class ResearchService {
     currentStatus: ResearchStatus,
     newStatus: ResearchStatus,
   ) {
+    if (currentStatus === newStatus) {
+      return;
+    }
     if (
       !this.availableStatusChanges.includes(`${currentStatus}-${newStatus}`)
     ) {

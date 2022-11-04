@@ -172,6 +172,9 @@ export class DicomService {
   }
 
   validateStatusChanging(currentStatus: DicomStatus, newStatus: DicomStatus) {
+    if (currentStatus === newStatus) {
+      return;
+    }
     if (
       !this.availableStatusChanges.includes(`${currentStatus}-${newStatus}`)
     ) {
