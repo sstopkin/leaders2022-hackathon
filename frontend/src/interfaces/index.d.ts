@@ -33,6 +33,7 @@ export interface IResearch {
     parentResearchId: string;
     assigneeUserId: string;
     markup: null | RawMarkup;
+    autoMarkup: null | Array<Array<Array<{ x: number, y: number }>>>
 }
 
 export interface IResearchFilterVariables {

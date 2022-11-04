@@ -3,28 +3,39 @@ import {
     IResourceComponentsProps,
     useNavigation,
 } from "@pankod/refine-core";
-import { Button, Create, Form, Icons, Input, Select, useForm, useSelect } from "@pankod/refine-antd";
-import { IResearch } from "interfaces";
+import {
+    Button,
+    Checkbox,
+    Create,
+    Form,
+    Icons,
+    Input,
+    Select,
+    useForm,
+    useSelect
+} from "@pankod/refine-antd";
+import {IResearch} from "interfaces";
 import ReactMde from "react-mde";
 import ReactMarkdown from "react-markdown";
-import { useState } from "react";
+import {useState} from "react";
 
 export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
     const [selectedTab, setSelectedTab] = useState<"write" | "preview">("write");
     const t = useTranslate();
     const navigation = useNavigation();
 
-    const { formProps, saveButtonProps } = useForm<IResearch>();
+    const {formProps, saveButtonProps} = useForm<IResearch>();
 
-    const { selectProps: researchesSelectProps } = useSelect<IResearch>({
+    const {selectProps: researchesSelectProps} = useSelect<IResearch>({
         resource: "researches",
         optionLabel: "name",
         optionValue: "id",
     });
 
     return (
-        <Create saveButtonProps={saveButtonProps} title={<div style={{display: 'flex', alignItems: 'center'}} >
-            <Button style={{marginRight: '8px'}} onClick={navigation.goBack} type="text" icon={<Icons.ArrowLeftOutlined/>}/><span>Генерация исследования</span></div>}>
+        <Create saveButtonProps={saveButtonProps} title={<div style={{display: 'flex', alignItems: 'center'}}>
+            <Button style={{marginRight: '8px'}} onClick={navigation.goBack} type="text"
+                    icon={<Icons.ArrowLeftOutlined/>}/><span>Генерация исследования</span></div>}>
             <Form {...formProps} layout="vertical">
                 <Form.Item
                     label={t("researches.fields.name")}
@@ -39,7 +50,7 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
                         },
                     ]}
                 >
-                    <Input />
+                    <Input/>
                 </Form.Item>
                 <Form.Item
                     label={t("researches.fields.parentResearch")}
@@ -168,6 +179,9 @@ export const ResearchesGenerate: React.FC<IResourceComponentsProps> = () => {
                             }
                         ]}
                     />
+                </Form.Item>
+                <Form.Item label={t("researches.fields.autoMarkup")} name="autoMarkup" valuePropName="checked">
+                    <Checkbox/>
                 </Form.Item>
                 <Form.Item
                     label={t("researches.fields.description")}

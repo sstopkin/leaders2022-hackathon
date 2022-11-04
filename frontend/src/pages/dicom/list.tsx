@@ -101,6 +101,7 @@ export const DicomsList: React.FC = () => {
                     currentUserId={currentUserData?.id || "-1"}
                     dicomFiles={dicomFiles}
                     markup={researchData?.data.markup}
+                    autoMarkup={researchData?.data.autoMarkup || null}
                 />}
         </>
     </div>

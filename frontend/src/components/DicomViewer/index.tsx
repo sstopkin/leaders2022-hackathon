@@ -1,4 +1,5 @@
 import React, {ChangeEvent} from "react";
+import {v4 as uuidv4} from "uuid";
 import * as cornerstone from "@cornerstonejs/core";
 import {RenderingEngine} from "@cornerstonejs/core";
 import {Button, Icons, Spin, Tooltip, Select} from "@pankod/refine-antd";
@@ -72,7 +73,8 @@ interface DicomViewerProps {
     currentUserName: string,
     currentUserId: string,
     currentResearchId: string,
-    markup?: null | RawMarkup
+    markup?: null | RawMarkup,
+    autoMarkup?: null | Array<Array<Array<{ x: number, y: number }>>>
 }
 
 interface AnnotationsState {
@@ -143,12 +145,74 @@ const VoiModesValues: { [key in VoiModes]: VOIRange } = {
     }
 }
 
+const generatePolygon = (FrameOfReferenceUID: string, index: number, points: Array<Array<number>>): Annotation => {
+    return {
+        isVisible: true,
+        "metadata": {
+            "viewPlaneNormal": [
+                0,
+                0,
+                -1
+            ],
+            "viewUp": [
+                0,
+                -1,
+                0
+            ],
+            "FrameOfReferenceUID": FrameOfReferenceUID,
+            "referencedImageId": `dicomfile:${index}`,
+            "toolName": "PlanarFreehandROI"
+        },
+        "data": {
+            "handles": {
+                "points": [],
+                "activeHandleIndex": null,
+                "textBox": {
+                    "hasMoved": false,
+                    "worldPosition": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "worldBoundingBox": {
+                        "topLeft": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "topRight": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "bottomLeft": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "bottomRight": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                }
+            },
+            "polyline": points,
+            "label": "",
+            "isOpenContour": false
+        },
+        "annotationUID": uuidv4()
+    }
+}
+
 const DicomViewer: React.FC<DicomViewerProps> = ({
                                                      dicomFiles,
                                                      currentUserId,
                                                      currentResearchId,
                                                      currentUserName,
-                                                     markup
+                                                     markup,
+                                                     autoMarkup
                                                  }) => {
     const CustomLevel = React.useRef(class CustomLevel extends WindowLevelTool {
         getNewRange({
@@ -222,6 +286,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
         cornerstoneTools.addTool(BidirectionalTool)
         cornerstoneTools.addTool(AngleTool)
         cornerstoneTools.addTool(PlanarFreehandROITool)
+
         return () => {
             if (!ignore) {
                 cornerstoneTools.removeTool(LengthTool)
@@ -260,7 +325,35 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                     if (element) {
                         await initializeCornerstone(imageIds, element)
                         if (viewportRef.current) {
+
+                            const viewport = viewportRef.current;
                             cornerstoneTools.annotation.state.removeAllAnnotations(element)
+                            const frameReference = viewportRef.current?.getFrameOfReferenceUID() || "-1";
+
+                            if (autoMarkup) {
+                                const ORIGINAL = 512;
+                                const width = viewport.getCanvas().width;
+                                const height = viewport.getCanvas().height
+
+                                const ratioH = ORIGINAL / height;
+                                const ratioW = ORIGINAL / width;
+
+                                console.log(ratioW, ratioH)
+                                console.log(width, height)
+                                console.log(height / width)
+
+                                const test = autoMarkup.map((layer, layerIdx) => layer.map(element => {
+                                    const elementCoords = element.map(coords => {
+                                        return [(coords.x - 256), (coords.y - 256), 0];
+                                    });
+                                    return generatePolygon(frameReference, layerIdx, elementCoords);
+                                }))
+                                const best = test.flat();
+                                best.forEach(el => {
+                                    cornerstoneTools.annotation.state.addAnnotation(element, el);
+                                })
+                            }
+
 
                             if (markup) {
                                 const userIds = Object.keys(markup);
