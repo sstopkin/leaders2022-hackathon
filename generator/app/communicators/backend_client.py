@@ -45,6 +45,7 @@ class BackendClient:
         params = {
             'researchId': research_id,
             'filter': 'isUploaded||$eq||true',
+            'sort': 'name,ASC',
         }
 
         resp = requests.request('GET', url, params=params, headers=self._headers)
