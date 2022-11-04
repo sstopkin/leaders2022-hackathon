@@ -151,7 +151,7 @@ def get_points_from_contour(contour):
     for point in contour:
         points.append([point[0, 0], point[0, 1]])
 
-    return np.array(points, np.int32)
+    return points
 
 
 def get_contours(mask):
@@ -171,19 +171,22 @@ def get_contours(mask):
     return new_contours
 
 
-def get_disease_contours(original_ct, ct_wtih_disease, disease_threshold=0.05):
+def get_disease_contours(original_ct, ct_wtih_disease, disease_threshold=0.05, ):
     diff = min_max_normalization(ct_wtih_disease - original_ct) > disease_threshold
     return get_contours(diff)
 
 
-def add_cancer_to_dicoms(dicoms: List[FileDataset], lung_part_list: List[int]):
+def add_cancer_to_dicoms(dicoms: List[FileDataset], lung_part_list: List[int], auto_markup: bool):
     cts = get_covid_images(dicoms)
 
     model = lungmask.get_model('unet', 'LTRCLobes')
     segs = lungmask.apply(cts, model)
 
     new_dicoms = []
-    dicom_contours = []
+    if auto_markup:
+        dicom_contours = []
+    else:
+        dicom_contours = None
     for idx in range(len(dicoms)):
 
         new_dcm = deepcopy(dicoms[idx])
@@ -197,12 +200,12 @@ def add_cancer_to_dicoms(dicoms: List[FileDataset], lung_part_list: List[int]):
                     lung_mask=lung_mask,
                     lung_segment_id=lung_seg_id,
                 )
-        disease_contours = get_disease_contours(original_ct=original_ct, ct_wtih_disease=ct)
 
-        new_dcm.PixelData = ct.tobytes()
         new_dcm._pixel_array = ct
 
         new_dicoms.append(new_dcm)
-        dicom_contours.append(disease_contours)
+        if auto_markup:
+            disease_contours = get_disease_contours(original_ct=original_ct, ct_wtih_disease=ct)
+            dicom_contours.append(disease_contours)
 
     return new_dicoms, dicom_contours

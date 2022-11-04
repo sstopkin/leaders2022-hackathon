@@ -4,8 +4,8 @@ from pydicom.dataset import FileDataset
 
 from entities.research_entities import ResearchGeneratingParams, segmets_lung_parts, GeneratingPathology
 from services.ml.src.cancer_generation import add_cancer_to_dicoms
-from services.ml.src.metastasis_generation import add_metastasis_to_dicoms
 from services.ml.src.covid_generation import add_covid_to_dicoms
+from services.ml.src.metastasis_generation import add_metastasis_to_dicoms
 from services.ml.src.utils.convert import pydicom_to_bytes, dicom_bytes_to_pydicom
 
 
@@ -37,36 +37,52 @@ def generate_pathologies(
         original_dicoms_bytes: List[bytes],
         generatingParams: ResearchGeneratingParams,
 ) -> Tuple[Any, List[Union[List[Any], Any]]]:
+    auto_markup = generatingParams.autoMarkup
+
     dicoms = dicom_bytes_to_pydicom(dicom_bytes_list=original_dicoms_bytes)
     dicoms, broken_dicoms = remove_broken_dicoms(dicoms)
-
     ordered_dicoms, original_idx = order_dicoms(dicoms)
 
     lung_part_list = list({segmets_lung_parts[segment] for segment in generatingParams.segments})
 
     if generatingParams.pathology == GeneratingPathology.COVID19:
-        new_dicoms, dicom_contours = add_covid_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
+        new_dicoms, dicom_contours = add_covid_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list,
+                                                         auto_markup=auto_markup)
     elif generatingParams.pathology == GeneratingPathology.CANCER:
-        new_dicoms, dicom_contours = add_cancer_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
+        new_dicoms, dicom_contours = add_cancer_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list,
+                                                          auto_markup=auto_markup)
     elif generatingParams.pathology == GeneratingPathology.METASTASIS:
-        new_dicoms, dicom_contours = add_metastasis_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
+        new_dicoms, dicom_contours = add_metastasis_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list,
+                                                              auto_markup=auto_markup)
     else:
         new_dicoms = ordered_dicoms
-        dicom_contours = [[]]*len(ordered_dicoms)
 
     original_ordered_dicoms = []
-    auto_mark_up = []
 
-    for idx in range(len(ordered_dicoms)):
-        for order_number, dicom, contour in zip(original_idx, new_dicoms, dicom_contours):
-            if idx == order_number:
-                original_ordered_dicoms.append(dicom)
-                auto_mark_up.append(contour)
+    if auto_markup:
+        auto_markup_contours = []
+    else:
+        auto_markup_contours = None
 
-    for idx, broken_dcm in broken_dicoms:
-        original_ordered_dicoms.insert(idx, broken_dcm)
-        auto_mark_up.append([])
+    if auto_markup:
+        for idx in range(len(ordered_dicoms)):
+            for order_number, dicom, contour in zip(original_idx, new_dicoms, dicom_contours):
+                if idx == order_number:
+                    original_ordered_dicoms.append(dicom)
+                    auto_markup_contours.append(contour)
+
+        for idx, broken_dcm in broken_dicoms:
+            original_ordered_dicoms.insert(idx, broken_dcm)
+            auto_markup_contours.insert(idx, [])
+    else:
+        for idx in range(len(ordered_dicoms)):
+            for order_number, dicom in zip(original_idx, new_dicoms):
+                if idx == order_number:
+                    original_ordered_dicoms.append(dicom)
+
+        for idx, broken_dcm in broken_dicoms:
+            original_ordered_dicoms.insert(idx, broken_dcm)
 
     dicom_bytes = pydicom_to_bytes(original_ordered_dicoms)
 
-    return dicom_bytes, auto_mark_up
+    return dicom_bytes, auto_markup_contours
