@@ -55,6 +55,7 @@ class ResearchGeneratingParams(BaseModel):
     pathology: GeneratingPathology
     diseasesCount: GeneratingDiseasesCount
     diseaseSize: GeneratingDiseasesSize
+    autoMarkup: bool
 
 
 class GeneratingResearch(BaseModel):
