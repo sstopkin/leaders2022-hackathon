@@ -2,6 +2,7 @@ import React from "react";
 import {Button, Icons, Tooltip} from "@pankod/refine-antd";
 import styles from "./AnnotationsList.module.css";
 import {useTranslate} from "@pankod/refine-core";
+import Truncate from "react-truncate";
 
 interface AnnotationsListProps {
     currentUserId: string,
@@ -57,8 +58,8 @@ const AnnotationsSubList: React.FC<{
             marginBottom: '8px',
             borderBottom: '1px solid gray'
         }}>
-            <span
-                style={{fontWeight: 'bold'}}>{`(${data.length}) `}{userId === currentUserId ? 'Ваши аннотации' : username}</span>
+            <Tooltip title={username} placement="top"><span
+                style={{fontWeight: 'bold'}}>{`(${data.length}) `}<Truncate width={150} lines={1}>{userId === currentUserId ? 'Ваши аннотации' : username}</Truncate></span></Tooltip>
             <div className={styles.listTitleButtonsContainer}>
                 {data.length > 0 &&
                     <Button onClick={() => handleGroupVisibility(userId, !visibleStatus)}
