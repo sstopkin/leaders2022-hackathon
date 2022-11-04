@@ -1,7 +1,7 @@
 import datetime
 import logging
 import uuid
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from communicators import cloud_client
 from communicators.backend_client import BackendClient
@@ -35,7 +35,7 @@ class MainGeneratorLoop(AbstractLoopService):
                 return
             #
             original_dicoms_bytes = self._download_dicoms(original_dicoms=original_dicoms)
-            generated_dicoms_bytes = self._generate_dicoms_with_pathologies(
+            generated_dicoms_bytes, auto_markup = self._generate_dicoms_with_pathologies(
                 research=research,
                 original_dicoms_bytes=original_dicoms_bytes,
             )
@@ -47,6 +47,7 @@ class MainGeneratorLoop(AbstractLoopService):
                 raise Exception(f'Original DICOM files size is not equal to generated DICOM files')
             #
             self._upload_generated_dicoms(created_dicoms=created_dicoms, generated_dicoms_bytes=generated_dicoms_bytes)
+            self._send_auto_markup_to_research(research=research, auto_markup=auto_markup)
         except Exception as ex:
             logger.error(f'Error during generating: {ex}')
             if research:
@@ -98,7 +99,7 @@ class MainGeneratorLoop(AbstractLoopService):
 
     def _generate_dicoms_with_pathologies(self, research: GeneratingResearch, original_dicoms_bytes: List[bytes]):
         try:
-            generated_dicoms_bytes, auto_mark = generator.generate_pathologies(
+            generated_dicoms_bytes, auto_markup = generator.generate_pathologies(
                 original_dicoms_bytes=original_dicoms_bytes,
                 generatingParams=research.generatingParams,
             )
@@ -106,7 +107,7 @@ class MainGeneratorLoop(AbstractLoopService):
         except Exception as ex:
             raise Exception(f'Error during generating DICOM files for research: {research.id} - {research.name}: {ex}')
 
-        return generated_dicoms_bytes
+        return generated_dicoms_bytes, auto_markup
 
     def _create_generated_dicoms(self, research_id: uuid.UUID, original_dicoms: List[Dicom]) -> List[CreatedDicom]:
         created_dicoms = []
@@ -137,3 +138,13 @@ class MainGeneratorLoop(AbstractLoopService):
                 logger.info(f'Marked as uploaded DICOM file: {created_dicom.id} - {created_dicom.name}')
             except Exception as ex:
                 raise Exception(f'Error during marking DICOM file as uploaded: {ex}')
+
+    def _send_auto_markup_to_research(self, research: GeneratingResearch, auto_markup: Dict):
+        try:
+            self._backend_client.send_auto_markup_to_research(
+                research_id=research.id,
+                auto_markup=auto_markup,
+            )
+        except Exception as ex:
+            raise Exception(f'Error during sending auto markup to research {research.id} - {research.name}: {ex}')
+

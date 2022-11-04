@@ -45,6 +45,7 @@ class BackendClient:
         params = {
             'researchId': research_id,
             'filter': 'isUploaded||$eq||true',
+            'sort': 'name,ASC',
         }
 
         resp = requests.request('GET', url, params=params, headers=self._headers)
@@ -63,6 +64,14 @@ class BackendClient:
         url = f'{self._backend_api_base_url}/{self.researches_endpoint}/{research_id}'
         json = {
             'status': status.value,
+        }
+        resp = requests.request('PATCH', url, json=json, headers=self._headers)
+        self._validate_response_status(resp)
+
+    def send_auto_markup_to_research(self, research_id: UUID, auto_markup: Dict):
+        url = f'{self._backend_api_base_url}/{self.researches_endpoint}/{research_id}'
+        json = {
+            'autoMarkup': auto_markup,
         }
         resp = requests.request('PATCH', url, json=json, headers=self._headers)
         self._validate_response_status(resp)

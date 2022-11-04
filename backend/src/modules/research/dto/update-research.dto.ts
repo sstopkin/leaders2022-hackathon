@@ -28,4 +28,9 @@ export class UpdateResearchDto {
   @IsOptional()
   @ValidateNested({ each: true })
   public markup?: any;
+
+  @ApiPropertyOptional({ description: 'Auto markup' })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  public autoMarkup?: any;
 }

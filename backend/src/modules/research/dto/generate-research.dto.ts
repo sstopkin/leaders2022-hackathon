@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 import {
   GeneratingDiseasesCount,
   GeneratingDiseasesSize,
@@ -48,4 +54,9 @@ export class GenerateResearchDto {
   @IsNotEmpty()
   @IsEnum(GeneratingDiseasesSize)
   readonly diseaseSize: GeneratingDiseasesSize;
+
+  @ApiProperty({ description: 'Should auto markup be made' })
+  @IsNotEmpty()
+  @IsBoolean()
+  readonly autoMarkup: boolean;
 }

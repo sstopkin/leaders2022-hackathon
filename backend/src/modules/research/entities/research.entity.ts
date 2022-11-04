@@ -73,6 +73,11 @@ export class Research {
   @IsOptional()
   public markup?: any;
 
+  @ApiProperty({ description: 'Auto markup' })
+  @Column({ type: 'json', nullable: true })
+  @IsOptional()
+  public autoMarkup?: any;
+
   @ManyToOne(() => User)
   @JoinColumn({ name: 'createdByUserId', referencedColumnName: 'id' })
   public createdBy: User;
