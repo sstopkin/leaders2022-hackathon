@@ -1,4 +1,4 @@
-from typing import List, Union, Tuple, Any
+from typing import List, Tuple, Dict, Optional, Any
 
 from pydicom.dataset import FileDataset
 
@@ -36,7 +36,7 @@ def order_dicoms(dicoms):
 def generate_pathologies(
         original_dicoms_bytes: List[bytes],
         generatingParams: ResearchGeneratingParams,
-) -> Tuple[Any, List[Union[List[Any], Any]]]:
+) -> Tuple[Any, Optional[List[List[List[Dict[str, Any]]]]]]:
     auto_markup = generatingParams.autoMarkup
 
     dicoms = dicom_bytes_to_pydicom(dicom_bytes_list=original_dicoms_bytes)
@@ -85,4 +85,21 @@ def generate_pathologies(
 
     dicom_bytes = pydicom_to_bytes(original_ordered_dicoms)
 
-    return dicom_bytes, auto_markup_contours
+    if auto_markup:
+        json_auto_mark_up = []
+
+        for dicom_slice in auto_markup_contours:
+            new_slice = []
+            for contour in dicom_slice:
+                new_contour = []
+
+                for point in contour:
+                    x, y = point
+                    new_contour.append({"x": x, "y": y})
+                new_slice.append(new_contour)
+
+            json_auto_mark_up.append(new_slice)
+    else:
+        json_auto_mark_up = None
+
+    return dicom_bytes, json_auto_mark_up
