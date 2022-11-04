@@ -56,7 +56,7 @@ export class GenerateResearchDto {
   readonly diseaseSize: GeneratingDiseasesSize;
 
   @ApiProperty({ description: 'Should auto markup be made' })
-  @IsNotEmpty()
+  @IsOptional()
   @IsBoolean()
-  readonly autoMarkup: boolean;
+  readonly autoMarkup?: boolean;
 }

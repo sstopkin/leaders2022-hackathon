@@ -92,7 +92,7 @@ export class ResearchService {
       pathology: dto.pathology,
       diseasesCount: dto.diseasesCount,
       diseaseSize: dto.diseaseSize,
-      autoMarkup: dto.autoMarkup,
+      autoMarkup: dto.autoMarkup || false,
     };
 
     const research = new Research();
