@@ -149,7 +149,7 @@ def get_covid_images(dicoms):
 def get_points_from_contour(contour):
     points = []
     for point in contour:
-        points.append([point[0, 0], point[0, 1]])
+        points.append([int(point[0, 0]), int(point[0, 0])])
 
     return points
 
