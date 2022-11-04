@@ -98,7 +98,7 @@ class MainGeneratorLoop(AbstractLoopService):
 
     def _generate_dicoms_with_pathologies(self, research: GeneratingResearch, original_dicoms_bytes: List[bytes]):
         try:
-            generated_dicoms_bytes = generator.generate_pathologies(
+            generated_dicoms_bytes, auto_mark = generator.generate_pathologies(
                 original_dicoms_bytes=original_dicoms_bytes,
                 generatingParams=research.generatingParams,
             )

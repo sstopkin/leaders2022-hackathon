@@ -146,6 +146,36 @@ def get_covid_images(dicoms):
     return np.concatenate([ds.pixel_array[None] for ds in dicoms])
 
 
+def get_points_from_contour(contour):
+    points = []
+    for point in contour:
+        points.append([point[0, 0], point[0, 1]])
+
+    return np.array(points, np.int32)
+
+
+def get_contours(mask):
+    mask = mask * 255
+    mask = mask.astype(np.uint8)
+
+    contours, hierarchy = cv.findContours(image=mask, mode=cv.RETR_TREE, method=cv.CHAIN_APPROX_TC89_L1)
+
+    new_contours = []
+    if hierarchy is not None:
+        for cntr, hrch in zip(contours, hierarchy[0]):
+
+            if (len(cntr) > 10) and (hrch[3] == -1):
+                new_cntr = get_points_from_contour(cntr)
+                new_contours.append(new_cntr)
+
+    return new_contours
+
+
+def get_disease_contours(original_ct, ct_wtih_disease, disease_threshold=0.05):
+    diff = min_max_normalization(ct_wtih_disease - original_ct) > disease_threshold
+    return get_contours(diff)
+
+
 def add_cancer_to_dicoms(dicoms: List[FileDataset], lung_part_list: List[int]):
     cts = get_covid_images(dicoms)
 
@@ -153,12 +183,13 @@ def add_cancer_to_dicoms(dicoms: List[FileDataset], lung_part_list: List[int]):
     segs = lungmask.apply(cts, model)
 
     new_dicoms = []
+    dicom_contours = []
     for idx in range(len(dicoms)):
 
         new_dcm = deepcopy(dicoms[idx])
         ct = cts[idx]
         lung_mask = segs[idx]
-
+        original_ct = ct.copy()
         for lung_seg_id in lung_part_list:
             if lung_seg_id in np.unique(lung_mask):
                 ct = add_cancer_to_ct(
@@ -166,9 +197,12 @@ def add_cancer_to_dicoms(dicoms: List[FileDataset], lung_part_list: List[int]):
                     lung_mask=lung_mask,
                     lung_segment_id=lung_seg_id,
                 )
+        disease_contours = get_disease_contours(original_ct=original_ct, ct_wtih_disease=ct)
 
         new_dcm.PixelData = ct.tobytes()
         new_dcm._pixel_array = ct
 
         new_dicoms.append(new_dcm)
-    return new_dicoms
+        dicom_contours.append(disease_contours)
+
+    return new_dicoms, dicom_contours
