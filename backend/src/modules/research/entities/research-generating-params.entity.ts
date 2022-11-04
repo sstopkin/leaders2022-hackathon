@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty } from 'class-validator';
 
 export enum GeneratingSegment {
   RIGHT_DOWN = 'rightDown',
@@ -50,4 +50,9 @@ export class ResearchGeneratingParams {
   @IsNotEmpty()
   @IsEnum(GeneratingDiseasesSize)
   readonly diseaseSize: GeneratingDiseasesSize;
+
+  @ApiProperty({ description: 'Should auto markup be made' })
+  @IsNotEmpty()
+  @IsBoolean()
+  readonly autoMarkup: boolean;
 }

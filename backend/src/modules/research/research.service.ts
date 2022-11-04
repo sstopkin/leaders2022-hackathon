@@ -92,6 +92,7 @@ export class ResearchService {
       pathology: dto.pathology,
       diseasesCount: dto.diseasesCount,
       diseaseSize: dto.diseaseSize,
+      autoMarkup: dto.autoMarkup,
     };
 
     const research = new Research();
@@ -123,6 +124,9 @@ export class ResearchService {
     }
     if (!!dto.markup) {
       research.markup = dto.markup;
+    }
+    if (!!dto.autoMarkup) {
+      research.autoMarkup = dto.autoMarkup;
     }
 
     return this.repository.save(research);
