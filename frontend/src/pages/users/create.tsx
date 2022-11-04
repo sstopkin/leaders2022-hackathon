@@ -51,7 +51,7 @@ export const UsersCreate: React.FC<IResourceComponentsProps> = () => {
               max: 50
             },
             {
-              pattern: new RegExp('^[a-zA-Z-]*$')
+              pattern: new RegExp('^[a-zA-Zа-яА-Я-]*$')
             }
           ]}
         >
@@ -69,7 +69,7 @@ export const UsersCreate: React.FC<IResourceComponentsProps> = () => {
               max: 50
             },
             {
-              pattern: new RegExp('^[a-zA-Z-]*$')
+              pattern: new RegExp('^[a-zA-Zа-яА-Я-]*$')
             }
           ]}
         >
@@ -84,7 +84,7 @@ export const UsersCreate: React.FC<IResourceComponentsProps> = () => {
               max: 50
             },
             {
-              pattern: new RegExp('^[a-zA-Z-]*$')
+              pattern: new RegExp('^[a-zA-Zа-яА-Я-]*$')
             }
           ]}
         >
