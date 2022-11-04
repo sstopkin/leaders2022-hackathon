@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union, Tuple, Any
 
 from pydicom.dataset import FileDataset
 
@@ -36,7 +36,7 @@ def order_dicoms(dicoms):
 def generate_pathologies(
         original_dicoms_bytes: List[bytes],
         generatingParams: ResearchGeneratingParams,
-) -> List[bytes]:
+) -> Tuple[Any, List[Union[List[Any], Any]]]:
     dicoms = dicom_bytes_to_pydicom(dicom_bytes_list=original_dicoms_bytes)
     dicoms, broken_dicoms = remove_broken_dicoms(dicoms)
 
@@ -45,23 +45,28 @@ def generate_pathologies(
     lung_part_list = list({segmets_lung_parts[segment] for segment in generatingParams.segments})
 
     if generatingParams.pathology == GeneratingPathology.COVID19:
-        new_dicoms = add_covid_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
+        new_dicoms, dicom_contours = add_covid_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
     elif generatingParams.pathology == GeneratingPathology.CANCER:
-        new_dicoms = add_cancer_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
+        new_dicoms, dicom_contours = add_cancer_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
     elif generatingParams.pathology == GeneratingPathology.METASTASIS:
-        new_dicoms = add_metastasis_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
+        new_dicoms, dicom_contours = add_metastasis_to_dicoms(ordered_dicoms, lung_part_list=lung_part_list)
     else:
-        ordered_dicoms
+        new_dicoms = ordered_dicoms
+        dicom_contours = [[]]*len(ordered_dicoms)
 
     original_ordered_dicoms = []
+    auto_mark_up = []
+
     for idx in range(len(ordered_dicoms)):
-        for order_number, dicom in zip(original_idx, new_dicoms):
+        for order_number, dicom, contour in zip(original_idx, new_dicoms, dicom_contours):
             if idx == order_number:
                 original_ordered_dicoms.append(dicom)
+                auto_mark_up.append(contour)
 
     for idx, broken_dcm in broken_dicoms:
         original_ordered_dicoms.insert(idx, broken_dcm)
+        auto_mark_up.append([])
 
     dicom_bytes = pydicom_to_bytes(original_ordered_dicoms)
 
-    return dicom_bytes
+    return dicom_bytes, auto_mark_up
