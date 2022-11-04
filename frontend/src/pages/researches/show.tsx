@@ -132,7 +132,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                             type="primary"
                             icon={<Icons.UploadOutlined/>}
                         >
-                            Загрузить
+                            Скачать
                         </Button>
                         {researchRecord?.status === ResearchStatuses.READY_TO_MARK && <Button
                             type="primary"
