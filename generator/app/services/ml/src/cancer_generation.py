@@ -200,7 +200,7 @@ def add_cancer_to_dicoms(dicoms: List[FileDataset], lung_part_list: List[int], a
                     lung_mask=lung_mask,
                     lung_segment_id=lung_seg_id,
                 )
-
+        new_dcm.PixelData = ct.tobytes()
         new_dcm._pixel_array = ct
 
         new_dicoms.append(new_dcm)
