@@ -2,8 +2,8 @@ import {
     useTranslate,
     IResourceComponentsProps,
 } from "@pankod/refine-core";
-import { Edit, Form, Input, Select, useForm } from "@pankod/refine-antd";
-import { IResearch } from "interfaces";
+import { Edit, Form, Input, Select, useForm, useSelect } from "@pankod/refine-antd";
+import { IResearch, IUser } from "interfaces";
 import ReactMde from "react-mde";
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
@@ -13,6 +13,12 @@ export const ResearchesEdit: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
 
     const { formProps, saveButtonProps } = useForm<IResearch>();
+
+    const { selectProps: usersSelectProps } = useSelect<IUser>({
+        resource: "users",
+        optionLabel: "lastName",
+        optionValue: "id",
+    });
 
     return (
         <Edit saveButtonProps={saveButtonProps}>
@@ -65,6 +71,12 @@ export const ResearchesEdit: React.FC<IResourceComponentsProps> = () => {
                             }
                         ]}
                     />
+                </Form.Item>
+                <Form.Item
+                    label={t("researches.fields.assigneeUser")}
+                    name="assigneeUserId"
+                 >
+                    <Select allowClear {...usersSelectProps} />
                 </Form.Item>
                 <Form.Item
                     label={t("researches.fields.description")}
