@@ -1,12 +1,14 @@
 import {
     useTranslate,
     IResourceComponentsProps,
+    useList,
 } from "@pankod/refine-core";
-import { Edit, Form, Input, Select, useForm, useSelect } from "@pankod/refine-antd";
+import { Edit, Form, Input, Select, useForm } from "@pankod/refine-antd";
 import { IResearch, IUser } from "interfaces";
 import ReactMde from "react-mde";
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
+import { returnFullNameFromUserObject } from "utils";
 
 export const ResearchesEdit: React.FC<IResourceComponentsProps> = () => {
     const [selectedTab, setSelectedTab] = useState<"write" | "preview">("write");
@@ -14,10 +16,8 @@ export const ResearchesEdit: React.FC<IResourceComponentsProps> = () => {
 
     const { formProps, saveButtonProps } = useForm<IResearch>();
 
-    const { selectProps: usersSelectProps } = useSelect<IUser>({
-        resource: "users",
-        optionLabel: "lastName",
-        optionValue: "id",
+    const users = useList<IUser>({
+        resource: "users"
     });
 
     return (
@@ -75,8 +75,13 @@ export const ResearchesEdit: React.FC<IResourceComponentsProps> = () => {
                 <Form.Item
                     label={t("researches.fields.assigneeUser")}
                     name="assigneeUserId"
-                 >
-                    <Select allowClear {...usersSelectProps} />
+                >
+                    <Select
+                        allowClear
+                        options={users?.data?.data.map(user => ({
+                            value: user.id,
+                            label: returnFullNameFromUserObject(user)
+                        }))} />
                 </Form.Item>
                 <Form.Item
                     label={t("researches.fields.description")}
