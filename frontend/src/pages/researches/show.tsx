@@ -173,7 +173,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                             <>
                                 <Title level={5}>{t("researches.fields.parentResearch")}</Title>
                                 <Typography.Text>
-                                    <Link href={researchRecord?.parentResearchId}>Перейти к исходному исследованию</Link>
+                                    <Link href={researchRecord?.parentResearchId}>перейти к исходному исследованию</Link>
                                 </Typography.Text>
                             </>
                         )}
