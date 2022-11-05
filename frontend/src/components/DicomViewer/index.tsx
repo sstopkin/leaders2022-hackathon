@@ -718,7 +718,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                     />
                 </div>
                 <div className={styles.modeSelectContainer}>
-                    <h4>Режим просмотра</h4>
+                    <h4>Параметры окна визуализации</h4>
                     <Select
                         defaultValue={'DEFAULT'}
                         style={{width: 160}}
