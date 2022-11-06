@@ -7,6 +7,8 @@ import axios from "axios";
 import {Button, Icons, Spin} from "@pankod/refine-antd";
 import DicomViewer from "../../components/DicomViewer";
 import Error from "../../components/Error";
+import dicomParser from "dicom-parser";
+import {DICOM_DICTIONARY} from "../../utils";
 
 export const DicomsList: React.FC = () => {
     const navigation = useNavigation();
@@ -39,6 +41,34 @@ export const DicomsList: React.FC = () => {
         },
     });
 
+    const getInstanceInformation = (file: File, origIdx: number): any => {
+        return new Promise((res) => {
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                const arrayBuffer = reader.result as ArrayBuffer;
+                const byteArray = new Uint8Array(arrayBuffer);
+                const dataSet = dicomParser.parseDicom(byteArray);
+
+                const dictionary = DICOM_DICTIONARY as { [key: string]: string };
+                const outputObject: { [key: string]: string } = {}
+                const elements = Object.keys(dictionary)
+                elements.forEach((address) => {
+                    const element = dataSet.elements[address];
+                    if (element) {
+                        const value = dataSet.string(address);
+                        if (value) {
+                            outputObject[dictionary[address]] = value;
+                        }
+                    }
+                })
+                res({instance: Number.parseInt(outputObject.instance), origIdx});
+            }
+
+            reader.readAsArrayBuffer(file);
+        })
+    }
+
     React.useEffect(() => {
         const downloadDicomFile = async () => {
             if (data?.data) {
@@ -58,7 +88,11 @@ export const DicomsList: React.FC = () => {
                         response.data
                     ));
 
-                    setDicomFiles(files);
+                    const sortedOrder: Array<{ origIdx: number, instance: number }> = await Promise.all(files.map((file, index) => getInstanceInformation(file, index)));
+                    sortedOrder.sort((a, b) => a.instance - b.instance)
+                    const outputFiles = sortedOrder.map(value => files[value.origIdx]);
+
+                    setDicomFiles(outputFiles);
                 } catch (err: any) {
                     console.error(err.response.statusText);
                     setError(err.response.statusText);
