@@ -36,7 +36,8 @@ import axios from "axios";
 import * as zip from "@zip.js/zip.js";
 import {returnFullNameFromUserObject} from "utils";
 
-const {Title} = Typography;
+
+const {Link, Title} = Typography;
 
 const model = (() => {
     let zipWriter: any;
@@ -132,7 +133,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                             type="primary"
                             icon={<Icons.UploadOutlined/>}
                         >
-                            Загрузить
+                            Скачать
                         </Button>
                         {researchRecord?.status === ResearchStatuses.READY_TO_MARK && <Button
                             type="primary"
@@ -172,7 +173,7 @@ export const ResearchesShow: React.FC<IResourceComponentsProps> = () => {
                             <>
                                 <Title level={5}>{t("researches.fields.parentResearch")}</Title>
                                 <Typography.Text>
-                                    <UrlField value={researchRecord?.parentResearchId}/>
+                                    <Link href={researchRecord?.parentResearchId}>перейти к исходному исследованию</Link>
                                 </Typography.Text>
                             </>
                         )}

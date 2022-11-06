@@ -18,6 +18,10 @@
     padding: 4px 4px 4px 8px;
 }
 
+.listTitleButtonsContainer {
+    display: flex;
+}
+
 .listTitleButtonsContainer > * {
     margin-left: 8px;
 }

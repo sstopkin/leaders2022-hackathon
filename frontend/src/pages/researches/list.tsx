@@ -141,13 +141,11 @@ export const ResearchesList: React.FC<IResourceComponentsProps> = () => {
                     render={(_, record) => (
                         <Space>
                             <ShowButton hideText size="small" recordItemId={record.id}/>
-                            {(permissionsData?.includes(Roles.ADMIN)) && (
-                                <EditButton
-                                    hideText
-                                    size="small"
-                                    recordItemId={record.id}
-                                />
-                            )}
+                              <EditButton
+                                hideText
+                                size="small"
+                                recordItemId={record.id}
+                              />
                             {permissionsData?.includes(Roles.ADMIN) && (
                                 <DeleteButton hideText size="small" recordItemId={record.id}/>
                             )}

@@ -1,5 +1,4 @@
 import React, {ChangeEvent} from "react";
-import {v4 as uuidv4} from "uuid";
 import * as cornerstone from "@cornerstonejs/core";
 import {RenderingEngine} from "@cornerstonejs/core";
 import {Button, Icons, Spin, Tooltip, Select} from "@pankod/refine-antd";
@@ -12,19 +11,19 @@ import {Annotation} from "@cornerstonejs/tools/dist/esm/types";
 import {MouseBindings} from "@cornerstonejs/tools/dist/esm/enums";
 import dicomParser from "dicom-parser";
 import {DICOM_DICTIONARY, formatDicomValues} from "../../utils";
-import {ReactComponent as RulerIcon} from "../../assets/icons/ruler.svg";
-import {ReactComponent as RectangleROI} from "../../assets/icons/rectangleROI.svg";
-import {ReactComponent as CircleROI} from "../../assets/icons/circleROI.svg";
-import {ReactComponent as PencilIcon} from "../../assets/icons/pencil.svg";
-import {ReactComponent as WindowLevelIcon} from "../../assets/icons/windowLevel.svg";
-import {ReactComponent as BidirectionalToolIcon} from "../../assets/icons/bidirectionalRuler.svg";
-import {ReactComponent as AngleIcon} from "../../assets/icons/angle.svg";
 import styles from "./DicomViewer.module.css";
 import {MouseWheelEventType} from "@cornerstonejs/tools/dist/esm/types/EventTypes";
 import AnnotationsList from "../AnnotationsList";
 import axiosInstance from "../../setup";
 import {API_ROOT} from "../../constants";
-import {RawMarkup} from "../../interfaces";
+import {ReactComponent as RulerIcon} from "../../assets/icons/ruler.svg";
+import {ReactComponent as RectangleROI} from "../../assets/icons/rectangleROI.svg";
+import {ReactComponent as CircleROI} from "../../assets/icons/circleROI.svg";
+import {ReactComponent as BidirectionalToolIcon} from "../../assets/icons/bidirectionalRuler.svg";
+import {ReactComponent as AngleIcon} from "../../assets/icons/angle.svg";
+import {ReactComponent as PencilIcon} from "../../assets/icons/pencil.svg";
+import {ReactComponent as WindowLevelIcon} from "../../assets/icons/windowLevel.svg";
+import {AnnotationsState, DicomViewerProps, generatePolygon, VoiModes, VoiModesLabels, VoiModesValues} from "./helpers";
 
 const {
     MagnifyTool,
@@ -39,10 +38,6 @@ const {
     ToolGroupManager,
     StackScrollMouseWheelTool
 } = cornerstoneTools;
-
-const toolGroupId = 'STACK_TOOL_GROUP_1';
-const renderingEngineId = "RENDER_ENGINE_1";
-const viewportId = 'VIEWPORT_1';
 
 const toolsIcons = {
     [LengthTool.toolName]: <RulerIcon/>,
@@ -68,143 +63,9 @@ const toolsNames = [
     MagnifyTool.toolName,
 ];
 
-interface DicomViewerProps {
-    dicomFiles: Array<File>,
-    currentUserName: string,
-    currentUserId: string,
-    currentResearchId: string,
-    markup?: null | RawMarkup,
-    autoMarkup?: null | Array<Array<Array<{ x: number, y: number }>>>
-}
-
-interface AnnotationsState {
-    [userId: string]: {
-        username: string
-        info: Array<{
-            uuid: string,
-            toolName: string,
-            imageIdx: number,
-            isVisible: boolean,
-        }>
-    }
-}
-
-type VoiModes =
-    'BRAIN'
-    | 'SUBDURAL'
-    | 'TEMPORAL_BONES'
-    | 'HEAD_SOFT_TISSUES'
-    | 'LUNGS'
-    | 'ABDOMEN_SOFT_TISSUES'
-    | 'LIVER'
-    | 'SPINE_SOFT_TISSUES'
-    | 'SPINE_BONES' | 'DEFAULT';
-
-const VoiModesLabels = ['DEFAULT', 'BRAIN', 'SUBDURAL', 'TEMPORAL_BONES', 'HEAD_SOFT_TISSUES', 'LUNGS', 'ABDOMEN_SOFT_TISSUES', 'LIVER', 'SPINE_SOFT_TISSUES', 'SPINE_BONES']
-
-const VoiModesValues: { [key in VoiModes]: VOIRange } = {
-    DEFAULT: {
-        upper: 0,
-        lower: 0
-    },
-    BRAIN: {
-        upper: 80,
-        lower: 40
-    },
-    SUBDURAL: {
-        upper: 300,
-        lower: 100
-    },
-    TEMPORAL_BONES: {
-        upper: 2800,
-        lower: 600
-    },
-    HEAD_SOFT_TISSUES: {
-        upper: 400,
-        lower: 60
-    },
-    LUNGS: {
-        upper: 1500,
-        lower: 600
-    },
-    ABDOMEN_SOFT_TISSUES: {
-        upper: 400,
-        lower: 50
-    },
-    LIVER: {
-        upper: 150,
-        lower: 30
-    },
-    SPINE_SOFT_TISSUES: {
-        upper: 250,
-        lower: 50
-    },
-    SPINE_BONES: {
-        upper: 1800,
-        lower: 400
-    }
-}
-
-const generatePolygon = (FrameOfReferenceUID: string, index: number, points: Array<Array<number>>): Annotation => {
-    return {
-        isVisible: true,
-        "metadata": {
-            "viewPlaneNormal": [
-                0,
-                0,
-                -1
-            ],
-            "viewUp": [
-                0,
-                -1,
-                0
-            ],
-            "FrameOfReferenceUID": FrameOfReferenceUID,
-            "referencedImageId": `dicomfile:${index}`,
-            "toolName": "PlanarFreehandROI"
-        },
-        "data": {
-            "handles": {
-                "points": [],
-                "activeHandleIndex": null,
-                "textBox": {
-                    "hasMoved": false,
-                    "worldPosition": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "worldBoundingBox": {
-                        "topLeft": [
-                            0,
-                            0,
-                            0
-                        ],
-                        "topRight": [
-                            0,
-                            0,
-                            0
-                        ],
-                        "bottomLeft": [
-                            0,
-                            0,
-                            0
-                        ],
-                        "bottomRight": [
-                            0,
-                            0,
-                            0
-                        ]
-                    }
-                }
-            },
-            "polyline": points,
-            "label": "",
-            "isOpenContour": false
-        },
-        "annotationUID": uuidv4()
-    }
-}
+const toolGroupId = 'STACK_TOOL_GROUP_1';
+const renderingEngineId = "RENDER_ENGINE_1";
+const viewportId = 'VIEWPORT_1';
 
 const DicomViewer: React.FC<DicomViewerProps> = ({
                                                      dicomFiles,
@@ -309,103 +170,115 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
         let ignore = false;
         if (!ignore) {
             cornerstoneTools.addTool(CustomWheelTool)
-            cornerstoneTools.addTool(CustomLevelTool);
-            parseDicomFile(dicomFiles[0]);
+            cornerstoneTools.addTool(CustomLevelTool)
+        }
+        parseDicomFile(dicomFiles[0]);
 
-            const displayDicomFile = async () => {
-                if (dicomFiles && dicomFiles.length > 0) {
-                    const imageIds: Array<string> = [];
-                    const annotations: Array<Annotation> = [];
-                    const newAnnotationsState: AnnotationsState = {}
+        const displayDicomFile = async () => {
+            if (dicomFiles && dicomFiles.length > 0) {
+                const imageIds: Array<string> = [];
+                const annotations: Array<Annotation> = [];
+                const newAnnotationsState: AnnotationsState = {}
+                dicomFiles.forEach((file) => {
+                    imageIds.push(cornerstoneWADOImageLoader.wadouri.fileManager.add(file))
+                })
 
-                    dicomFiles.forEach(file => {
-                        imageIds.push(cornerstoneWADOImageLoader.wadouri.fileManager.add(file))
-                    })
+                if (element) {
+                    await initializeCornerstone(imageIds, element)
+                    if (viewportRef.current) {
+                        cornerstoneTools.annotation.state.removeAllAnnotations(element)
+                        const frameReference = viewportRef.current?.getFrameOfReferenceUID() || "-1";
 
-                    if (element) {
-                        await initializeCornerstone(imageIds, element)
-                        if (viewportRef.current) {
+                        if (autoMarkup) {
+                            const ORIGINAL_CANVAS_SIZE = 512;
+                            const CURRENT_CANVAS_SIZE = 750;
 
-                            const viewport = viewportRef.current;
-                            cornerstoneTools.annotation.state.removeAllAnnotations(element)
-                            const frameReference = viewportRef.current?.getFrameOfReferenceUID() || "-1";
+                            const shrinkCoeff = ORIGINAL_CANVAS_SIZE / CURRENT_CANVAS_SIZE;
 
-                            if (autoMarkup) {
-                                const ORIGINAL = 512;
-                                const width = viewport.getCanvas().width;
-                                const height = viewport.getCanvas().height
+                            const autoAnnotations = autoMarkup.map((layer, layerIdx) => layer.map(element => {
+                                //Восьмерка подобрана вручную, просто чтобы лучше сходилось, скорее всего смещено из-за округления коэффициента.
+                                const elementCoords = element.map(coords => {
+                                    return [((coords.x - 256) * shrinkCoeff), ((coords.y - 256) * shrinkCoeff) - 8, 0];
+                                });
+                                return generatePolygon(frameReference, layerIdx, elementCoords);
+                            })).flat();
+                            autoAnnotations.forEach(autoAnnotation => {
+                                cornerstoneTools.annotation.state.addAnnotation(element, autoAnnotation);
+                            });
 
-                                const ratioH = ORIGINAL / height;
-                                const ratioW = ORIGINAL / width;
-
-                                console.log(ratioW, ratioH)
-                                console.log(width, height)
-                                console.log(height / width)
-
-                                const test = autoMarkup.map((layer, layerIdx) => layer.map(element => {
-                                    const elementCoords = element.map(coords => {
-                                        return [(coords.x - 256), (coords.y - 256), 0];
-                                    });
-                                    return generatePolygon(frameReference, layerIdx, elementCoords);
-                                }))
-                                const best = test.flat();
-                                best.forEach(el => {
-                                    cornerstoneTools.annotation.state.addAnnotation(element, el);
+                            newAnnotationsState['auto'] = {
+                                username: 'Авторазметка',
+                                info: autoAnnotations.map(autoAnnotation => {
+                                    const imageIdx = autoAnnotation.metadata.referencedImageId?.split(":")[1];
+                                    return {
+                                        uuid: autoAnnotation.annotationUID || "-1",
+                                        toolName: autoAnnotation.metadata.toolName,
+                                        isVisible: true,
+                                        imageIdx: imageIdx ? Number.parseInt(imageIdx) : 0
+                                    }
                                 })
                             }
+                        }
 
 
-                            if (markup) {
-                                const userIds = Object.keys(markup);
-                                userIds.forEach((userId) => {
-                                    annotations.push(...markup[userId].markup.map(annotation => ({
-                                        ...annotation,
-                                        isLocked: userId !== currentUserId
-                                    })));
+                        if (markup) {
+                            const userIds = Object.keys(markup);
+                            userIds.forEach((userId) => {
+                                annotations.push(...markup[userId].markup.map(annotation => ({
+                                    ...annotation,
+                                    isLocked: userId !== currentUserId
+                                })));
 
-                                    newAnnotationsState[userId] = {
-                                        username: markup[userId].username,
-                                        info: markup[userId].markup.map(annotation => {
-                                            const imageIdx = annotation.metadata.referencedImageId?.split(":")[1];
-                                            return {
-                                                uuid: annotation.annotationUID || "-1",
-                                                toolName: annotation.metadata.toolName,
-                                                isVisible: annotation.isVisible === undefined ? false : annotation.isVisible,
-                                                imageIdx: imageIdx ? Number.parseInt(imageIdx) : 0
-                                            }
-                                        })
-                                    }
-
-                                    if (!userIds.find((userId) => userId === currentUserId)) {
-                                        newAnnotationsState[currentUserId] = {
-                                            username: currentUserName,
-                                            info: []
+                                newAnnotationsState[userId] = {
+                                    username: markup[userId].username,
+                                    info: markup[userId].markup.map(annotation => {
+                                        const imageIdx = annotation.metadata.referencedImageId?.split(":")[1];
+                                        return {
+                                            uuid: annotation.annotationUID || "-1",
+                                            toolName: annotation.metadata.toolName,
+                                            isVisible: annotation.isVisible === undefined ? false : annotation.isVisible,
+                                            imageIdx: imageIdx ? Number.parseInt(imageIdx) : 0
                                         }
-                                    }
-                                });
-                            }
+                                    })
+                                }
 
-                            if (annotations.length > 0) {
-                                annotations.forEach(annotation => {
-                                    cornerstoneTools.annotation.state.addAnnotation(element, annotation)
-                                });
-                                setAnnotationsState(newAnnotationsState);
+                                if (!userIds.find((userId) => userId === currentUserId)) {
+                                    newAnnotationsState[currentUserId] = {
+                                        username: currentUserName,
+                                        info: []
+                                    }
+                                }
+                            });
+                        }
+
+                        if (annotations.length > 0 || autoMarkup) {
+                            annotations.forEach(annotation => {
+                                cornerstoneTools.annotation.state.addAnnotation(element, annotation)
+                            });
+                            if (newAnnotationsState[currentUserId] === undefined) {
+                                newAnnotationsState[currentUserId] = {
+                                    username: currentUserName,
+                                    info: []
+                                }
                             }
+                            setAnnotationsState(newAnnotationsState);
                         }
                     }
                 }
             }
-            displayDicomFile()
         }
+        displayDicomFile()
 
         return () => {
+            cornerstone.cache.purgeCache();
+            renderingEngineRef.current?.destroy();
             cornerstoneTools.removeTool(CustomLevelTool);
             cornerstoneTools.removeTool(CustomWheelTool);
             cornerstoneWADOImageLoader.wadouri.fileManager.purge();
             cornerstoneTools.ToolGroupManager.destroy();
             ignore = true
         }
-    }, [dicomFiles, currentUserId, markup, currentUserName])
+    }, [dicomFiles, currentUserId, markup, currentUserName, autoMarkup])
 
     const handleImportClick = () => {
         if (hiddenImportAnnotationInputRef.current) {
@@ -419,9 +292,11 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
         const userIds = Object.keys(annotationsState);
 
         userIds.forEach(userId => {
-            state[userId] = {
-                username: annotationsState[userId].username,
-                markup: annotationsState[userId].info.map(annotation => cornerstoneTools.annotation.state.getAnnotation(annotation.uuid))
+            if (userId !== 'auto') {
+                state[userId] = {
+                    username: annotationsState[userId].username,
+                    markup: annotationsState[userId].info.map(annotation => cornerstoneTools.annotation.state.getAnnotation(annotation.uuid))
+                }
             }
         })
 
@@ -820,12 +695,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                         </li>)}</ul>
                 </div>
                 <div className={styles.annotationsInfoBlock}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '4px'
-                    }}>
+                    <div className={styles.annotationsInfoTitle}>
                         <h3 style={{padding: 0}}>{t('dicom.annotations.title')}</h3>
                         <input
                             accept="application/JSON"
@@ -847,17 +717,8 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                         handleGroupDelete={groupAnnotationsDelete}
                     />
                 </div>
-                <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: '100%',
-                    zIndex: 99,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    padding: '8px',
-                    backgroundColor: '#D9D9D9'
-                }}>
-                    <h4>Режим просмотра</h4>
+                <div className={styles.modeSelectContainer}>
+                    <h4>Параметры окна визуализации</h4>
                     <Select
                         defaultValue={'DEFAULT'}
                         style={{width: 160}}
@@ -870,20 +731,14 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                 </div>
             </div>
             <div
-                onMouseUp={handleAnnotationDraw}
-                ref={imageZoneRef} className={styles.imageContainer}>
+                className={styles.imageContainer}>
+                <div ref={imageZoneRef} onMouseUp={handleAnnotationDraw} style={{width: '750px', height: '750px'}}/>
                 {voiRange &&
-                    <div style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        color: 'white',
-                        fontWeight: 'bold',
-                        padding: '4px'
-                    }}>WW {voiRange.upper.toFixed(3)} / WL {voiRange.lower.toFixed(3)}</div>}
+                    <div className={styles.voiRange}>WW {voiRange.upper.toFixed(3)} /
+                        WL {voiRange.lower.toFixed(3)}</div>}
             </div>
             <div className={styles.rightSidePanel}>
-                <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: "space-around"}}>
+                <div className={styles.editButtonsContainer}>
                     {toolsNames.filter(toolName => toolName !== StackScrollMouseWheelTool.toolName).map(toolName =>
                         <Tooltip
                             style={{flexBasis: '50%'}}
@@ -917,8 +772,8 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                         />
                     </Tooltip>
                 </div>
-                <div style={{display: 'flex', justifyContent: 'space-around', marginTop: '36px'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-around', flexDirection: 'column'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '36px'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column'}}>
                         <Tooltip
                             placement="left"
                             color="green"
@@ -945,7 +800,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                             />
                         </Tooltip>
                     </div>
-                    <div style={{display: 'flex', justifyContent: 'space-around', flexDirection: 'column'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column'}}>
                         <Tooltip
                             placement="left"
                             color="green"
@@ -973,7 +828,7 @@ const DicomViewer: React.FC<DicomViewerProps> = ({
                         </Tooltip>
                     </div>
                 </div>
-                <div style={{marginTop: 'auto', display: 'flex', justifyContent: 'space-around'}}>
+                <div style={{marginTop: 'auto', display: 'flex', justifyContent: 'space-between'}}>
                     <Tooltip
                         placement="left"
                         color="green"
