@@ -88,7 +88,7 @@ export class UserService {
         this.BCRYPT_SALT_ROUNDS,
       );
     }
-    if (!!updateUserDto.isActive) {
+    if (updateUserDto.isActive != undefined) {
       user.isActive = updateUserDto.isActive;
     }
     if (!!updateUserDto.role) {
