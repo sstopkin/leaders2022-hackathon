@@ -159,7 +159,7 @@ export const UsersEdit: React.FC<IResourceComponentsProps> = () => {
           />
         </Form.Item>
         <Form.Item label={t("users.fields.isActive")} name="isActive" valuePropName="checked">
-          <Checkbox>Active</Checkbox>
+          <Checkbox></Checkbox>
         </Form.Item>
         <Form.Item
           label={t("users.fields.description")}
