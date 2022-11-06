@@ -117,6 +117,17 @@ $ docker-compose -f docker-compose-test.yml up -d minio-migrations
 $ docker-compose -f docker-compose-test.yml up -d
 ```
 
+### Подготовка и миграции БД
+
+Инициализация схемы БД:
+```
+$ ENV=<envname> yarn migration:run
+```
+
+[SQL скрипт для инициализации основных пользователей](backend/ops-tools/sql/create-admin.sql)
+
+[SQL скрипт для инициализации 10 демо-пользователей](backend/ops-tools/sql/create-demo-users.sql)
+
 ### Настройка nginx в режиме reverse-proxy
 
 Пример конфигурационного файла для настройки nginx. Необходимо настроить для 3 сущностей - фронтенд, бекенд и хранилище.
